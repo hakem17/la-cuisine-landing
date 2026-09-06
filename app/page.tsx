@@ -1,257 +1,419 @@
-'use client'
+"use client";
 
-import { AssetPlaceholder } from '@/components/asset-placeholder'
-import { SiteFooter } from '@/components/site-footer'
-import { SiteHeader } from '@/components/site-header'
+import { AssetPlaceholder } from "@/components/asset-placeholder";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import {
-  ArrowDown,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
   MessageCircle,
   Minus,
   Plus,
-  Sparkles,
   X,
-} from 'lucide-react'
-import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 const circularFoodImages = [
-  { label: '[IMAGE PLACEHOLDER — AMUSE-BOUCHE]', hint: 'Circle 1:1 · Artisanal Amuse-Bouche' },
-  { label: '[IMAGE PLACEHOLDER — SEASONAL ENTRÉE]', hint: 'Circle 1:1 · French Starter Plating' },
-  { label: '[IMAGE PLACEHOLDER — SIGNATURE MAIN]', hint: 'Circle 1:1 · Herb-Crusted Lamb / Beef' },
-  { label: '[IMAGE PLACEHOLDER — ARTISANAL CHEESE]', hint: 'Circle 1:1 · Affiné Cheese Selection' },
-  { label: '[IMAGE PLACEHOLDER — FRENCH PÂTISSERIE]', hint: 'Circle 1:1 · Citrus Tartlet & Pastry' },
-  { label: '[IMAGE PLACEHOLDER — CANAPÉ SELECTION]', hint: 'Circle 1:1 · Passed Gourmet Canapés' },
-  { label: '[IMAGE PLACEHOLDER — TARTARE & SEAFOOD]', hint: 'Circle 1:1 · Scallop & Salmon Tartare' },
-  { label: '[IMAGE PLACEHOLDER — PETITS FOURS]', hint: 'Circle 1:1 · Mignardises & Sweet Treats' },
-]
+  {
+    label: "[IMAGE PLACEHOLDER — AMUSE-BOUCHE]",
+    hint: "Circle 1:1 · Artisanal Amuse-Bouche",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — SEASONAL ENTRÉE]",
+    hint: "Circle 1:1 · French Starter Plating",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — SIGNATURE MAIN]",
+    hint: "Circle 1:1 · Herb-Crusted Lamb / Beef",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — ARTISANAL CHEESE]",
+    hint: "Circle 1:1 · Affiné Cheese Selection",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — FRENCH PÂTISSERIE]",
+    hint: "Circle 1:1 · Citrus Tartlet & Pastry",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — CANAPÉ SELECTION]",
+    hint: "Circle 1:1 · Passed Gourmet Canapés",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — TARTARE & SEAFOOD]",
+    hint: "Circle 1:1 · Scallop & Salmon Tartare",
+  },
+  {
+    label: "[IMAGE PLACEHOLDER — PETITS FOURS]",
+    hint: "Circle 1:1 · Mignardises & Sweet Treats",
+  },
+];
 
 const galleryCards = [
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 01: PLATED DINNER TABLE]',
-    hint: 'Portrait 9:16 · Candlelit Private Table',
+    label: "[IMAGE PLACEHOLDER — GALLERY 01: PLATED DINNER TABLE]",
+    hint: "Portrait 9:16 · Candlelit Private Table",
   },
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 02: CHEF PLATING & SERVICE]',
-    hint: 'Portrait 9:16 · Chef Precision Garnish',
+    label: "[IMAGE PLACEHOLDER — GALLERY 02: CHEF PLATING & SERVICE]",
+    hint: "Portrait 9:16 · Chef Precision Garnish",
   },
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 03: COCKTAIL & CANAPÉ RECEPTION]',
-    hint: 'Portrait 9:16 · Passed Hors d’Oeuvres',
+    label: "[IMAGE PLACEHOLDER — GALLERY 03: COCKTAIL & CANAPÉ RECEPTION]",
+    hint: "Portrait 9:16 · Passed Hors d’Oeuvres",
   },
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 04: LUXURY BUFFET PRESENTATION]',
-    hint: 'Portrait 9:16 · Cascading French Buffet',
+    label: "[IMAGE PLACEHOLDER — GALLERY 04: LUXURY BUFFET PRESENTATION]",
+    hint: "Portrait 9:16 · Cascading French Buffet",
   },
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 05: OUTDOOR ESTATE GATHERING]',
-    hint: 'Portrait 9:16 · Al Fresco Dining Setup',
+    label: "[IMAGE PLACEHOLDER — GALLERY 05: OUTDOOR ESTATE GATHERING]",
+    hint: "Portrait 9:16 · Al Fresco Dining Setup",
   },
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 06: ARTISANAL DESSERT ATELIER]',
-    hint: 'Portrait 9:16 · Patisserie & Sweet Display',
+    label: "[IMAGE PLACEHOLDER — GALLERY 06: ARTISANAL DESSERT ATELIER]",
+    hint: "Portrait 9:16 · Patisserie & Sweet Display",
   },
   {
-    label: '[IMAGE PLACEHOLDER — GALLERY 07: EXECUTIVE BANQUET SETUP]',
-    hint: 'Portrait 9:16 · Corporate VIP Banquet',
+    label: "[IMAGE PLACEHOLDER — GALLERY 07: EXECUTIVE BANQUET SETUP]",
+    hint: "Portrait 9:16 · Corporate VIP Banquet",
   },
-]
+];
 
-const testimonials = [
+type Testimonial = {
+  id: number | string;
+  quote: string;
+  name: string;
+  event: string;
+  rating: number;
+  link?: string;
+};
+
+const fallbackTestimonials: Testimonial[] = [
   {
     id: 1,
     quote:
-      'Every detail felt effortless, from the first conversation to the last plate. The food was extraordinary and our guests are still talking about the evening. Chef Manou and the team crafted a seasonal five-course menu that perfectly captured authentic Parisian gastronomy with stunning presentation.',
-    name: 'Camille & Thomas',
-    event: 'Private Dinner · Abu Dhabi',
+      "Every detail felt effortless, from the first conversation to the last plate. The food was extraordinary and our guests are still talking about the evening. Chef Manou and the team crafted a seasonal five-course menu that perfectly captured authentic Parisian gastronomy with stunning presentation.",
+    name: "Camille & Thomas",
+    event: "Private Dinner · Abu Dhabi",
     rating: 5,
   },
   {
     id: 2,
     quote:
-      'Manou understood our brand brief immediately and delivered an executive reception that was both elevated and deeply hospitable. Pure Parisian finesse. The passed canapés and artisanal patisserie were exceptional.',
-    name: 'Sophie Laurent',
-    event: 'Luxury Brand Launch · DIFC, Dubai',
+      "Manou understood our brand brief immediately and delivered an executive reception that was both elevated and deeply hospitable. Pure Parisian finesse. The passed canapés and artisanal patisserie were exceptional.",
+    name: "Sophie Laurent",
+    event: "Luxury Brand Launch · DIFC, Dubai",
     rating: 5,
   },
   {
     id: 3,
     quote:
-      'A rare combination of calm, precision, and genuine warmth. The table looked breathtaking, and every course arrived at the perfect cadence. Truly made our milestone anniversary unforgettable.',
-    name: 'The Martin Family',
-    event: 'Anniversary Celebration · Saadiyat Island',
+      "A rare combination of calm, precision, and genuine warmth. The table looked breathtaking, and every course arrived at the perfect cadence. Truly made our milestone anniversary unforgettable.",
+    name: "The Martin Family",
+    event: "Anniversary Celebration · Saadiyat Island",
     rating: 5,
   },
   {
     id: 4,
     quote:
-      'Flawless execution for our 80-guest reception. The live stations were a major highlight, and the seamless front-of-house service gave us total peace of mind throughout the entire night.',
-    name: 'Alexandre & Nour',
-    event: 'Wedding Reception · Dubai',
+      "Flawless execution for our 80-guest reception. The live stations were a major highlight, and the seamless front-of-house service gave us total peace of mind throughout the entire night.",
+    name: "Alexandre & Nour",
+    event: "Wedding Reception · Dubai",
     rating: 5,
   },
   {
     id: 5,
     quote:
-      'Discreet, highly sophisticated, and punctual. The seasonal French dishes were plated with Michelin-level finesse. Our international board members were thoroughly impressed.',
-    name: 'David K.',
-    event: 'Executive Board Dinner · ADGM, Abu Dhabi',
+      "Discreet, highly sophisticated, and punctual. The seasonal French dishes were plated with Michelin-level finesse. Our international board members were thoroughly impressed.",
+    name: "David K.",
+    event: "Executive Board Dinner · ADGM, Abu Dhabi",
     rating: 5,
   },
   {
     id: 6,
     quote:
-      'From the bespoke canapé selection to the signature dessert tower, everything exceeded our high expectations. The team handled every dietary request with grace and creativity.',
-    name: 'Elena Rostova',
-    event: 'VIP Birthday Soirée · Palm Jumeirah',
+      "From the bespoke canapé selection to the signature dessert tower, everything exceeded our high expectations. The team handled every dietary request with grace and creativity.",
+    name: "Elena Rostova",
+    event: "VIP Birthday Soirée · Palm Jumeirah",
     rating: 5,
   },
-]
+];
 
 const faqs = [
   {
-    q: 'What areas across the UAE do you serve?',
-    a: 'We provide full-service catering and private chef experiences across Abu Dhabi, Dubai, and the wider Emirates. For special destination celebrations or private estates, we accommodate custom travel arrangements.',
+    q: "What areas across the UAE do you serve?",
+    a: "We provide full-service catering and private chef experiences across Abu Dhabi, Dubai, and the wider Emirates. For special destination celebrations or private estates, we accommodate custom travel arrangements.",
   },
   {
-    q: 'How far in advance should we reserve our date?',
-    a: 'We recommend inquiring 3–6 weeks in advance for intimate private dining and 2–3 months in advance for larger corporate events or weddings. We also accommodate short-notice requests based on calendar availability.',
+    q: "How far in advance should we reserve our date?",
+    a: "We recommend inquiring 3–6 weeks in advance for intimate private dining and 2–3 months in advance for larger corporate events or weddings. We also accommodate short-notice requests based on calendar availability.",
   },
   {
-    q: 'Can dietary preferences and allergies be accommodated?',
-    a: 'Every menu is bespoke. We curate dedicated menus for vegetarian, vegan, gluten-free, dairy-free, halal-certified, and specific allergy requirements without compromising culinary craftsmanship.',
+    q: "Can dietary preferences and allergies be accommodated?",
+    a: "Every menu is bespoke. We curate dedicated menus for vegetarian, vegan, gluten-free, dairy-free, halal-certified, and specific allergy requirements without compromising culinary craftsmanship.",
   },
   {
-    q: 'Do you provide full front-of-house service staff and tableware?',
-    a: 'Yes. Depending on your needs, we provide discreet chef-only execution or complete front-of-house teams including service captains, mixologists, bespoke tableware, linens, and tabletop styling.',
+    q: "Do you provide full front-of-house service staff and tableware?",
+    a: "Yes. Depending on your needs, we provide discreet chef-only execution or complete front-of-house teams including service captains, mixologists, bespoke tableware, linens, and tabletop styling.",
   },
   {
-    q: 'What is the booking and consultation process?',
-    a: 'You submit your event details through our online booking wizard. Within 24 hours, our culinary team contacts you with bespoke menu proposals, format recommendations, and an itemized quote.',
+    q: "What is the booking and consultation process?",
+    a: "You submit your event details through our online booking wizard. Within 24 hours, our culinary team contacts you with bespoke menu proposals, format recommendations, and an itemized quote.",
   },
-]
+];
 
 const usps = [
   {
-    num: '01',
-    title: 'Seasonal by nature',
-    desc: 'Bespoke menus driven by fresh market arrivals and authentic French gastronomic traditions.',
+    num: "01",
+    title: "Seasonal by nature",
+    desc: "Bespoke menus driven by fresh market arrivals and authentic French gastronomic traditions.",
+    imageLabel: "[IMAGE PLACEHOLDER — MARKET-FRESH SEASONAL PRODUCE]",
+    imageHint: "Ratio 3:4 · Chef selecting seasonal ingredients",
   },
   {
-    num: '02',
-    title: 'Personal by design',
-    desc: 'Tailored specifically to your occasion, dietary needs, guest profile, and aesthetic vision.',
+    num: "02",
+    title: "Personal by design",
+    desc: "Tailored specifically to your occasion, dietary needs, guest profile, and aesthetic vision.",
+    imageLabel: "[IMAGE PLACEHOLDER — MENU CONSULTATION WITH CLIENT]",
+    imageHint: "Ratio 3:4 · Chef Manou tailoring a bespoke menu",
   },
   {
-    num: '03',
-    title: 'Seamless in practice',
-    desc: 'Calm, disciplined hospitality and flawless execution from initial briefing to final clearing.',
+    num: "03",
+    title: "Seamless in practice",
+    desc: "Calm, disciplined hospitality and flawless execution from initial briefing to final clearing.",
+    imageLabel: "[IMAGE PLACEHOLDER — SERVICE TEAM IN ACTION]",
+    imageHint: "Ratio 3:4 · Flawless on-site event execution",
   },
   {
-    num: '04',
-    title: 'Uncompromising excellence',
-    desc: 'High-end ingredients, refined presentation, and zero-stress coordination for the host.',
+    num: "04",
+    title: "Uncompromising excellence",
+    desc: "High-end ingredients, refined presentation, and zero-stress coordination for the host.",
+    imageLabel: "[IMAGE PLACEHOLDER — PLATED SIGNATURE DISH]",
+    imageHint: "Ratio 3:4 · Refined final plating detail",
   },
-]
+];
 
 export default function Home() {
-  const [activeFaq, setActiveFaq] = useState<number | null>(0)
-  const [showStickyCta, setShowStickyCta] = useState(false)
-  const [scrollProgress, setScrollProgress] = useState(0)
+  const [activeFaq, setActiveFaq] = useState<number | null>(0);
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  // Scroll-linked parallax state for Section 5 Why Us USPs
+  const [activeUsp, setActiveUsp] = useState(0);
+  const uspItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Drag-to-scroll state for Section 6 gallery
-  const galleryRef = useRef<HTMLDivElement>(null)
-  const isGalleryDragging = useRef(false)
-  const galleryStartX = useRef(0)
-  const galleryScrollLeftStart = useRef(0)
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const isGalleryDragging = useRef(false);
+  const galleryStartX = useRef(0);
+  const galleryScrollLeftStart = useRef(0);
 
   // Carousel state for Section 7 Testimonials
-  const testimonialCarouselRef = useRef<HTMLDivElement>(null)
-  const [activeTestimonialPage, setActiveTestimonialPage] = useState(0)
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
-  const [selectedReviewModal, setSelectedReviewModal] = useState<(typeof testimonials)[0] | null>(null)
+  const testimonialCarouselRef = useRef<HTMLDivElement>(null);
+  const [activeTestimonialPage, setActiveTestimonialPage] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [selectedReviewModal, setSelectedReviewModal] =
+    useState<Testimonial | null>(null);
+  const [testimonials, setTestimonials] =
+    useState<Testimonial[]>(fallbackTestimonials);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/reviews")
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled || !data.success || !Array.isArray(data.reviews)) return;
+        const usable = data.reviews.filter(
+          (review: { snippet?: string; translatedSnippet?: string }) =>
+            review.snippet || review.translatedSnippet,
+        );
+        if (usable.length === 0) return;
+        const mapped: Testimonial[] = usable.map(
+          (
+            review: {
+              isoDate: string;
+              snippet?: string;
+              translatedSnippet?: string;
+              user: { name: string; link?: string };
+              date: string;
+              rating: number;
+              link?: string;
+            },
+            index: number,
+          ) => ({
+            id: review.isoDate || index,
+            quote: review.translatedSnippet ?? review.snippet ?? "",
+            name: review.user?.name ?? "Google User",
+            event: `Google Review · ${review.date}`,
+            rating: review.rating,
+            link: review.link ?? review.user?.link,
+          }),
+        );
+        setTestimonials(mapped);
+      })
+      .catch(() => {
+        // Keep the fallback testimonials on any fetch/parse failure.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleGalleryScroll = () => {
-    if (!galleryRef.current) return
-    const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current
-    const maxScroll = scrollWidth - clientWidth
+    if (!galleryRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current;
+    const maxScroll = scrollWidth - clientWidth;
     if (maxScroll > 0) {
-      setScrollProgress(scrollLeft / maxScroll)
+      setScrollProgress(scrollLeft / maxScroll);
     }
-  }
+  };
 
   const onGalleryMouseDown = (e: React.MouseEvent) => {
-    if (!galleryRef.current) return
-    isGalleryDragging.current = true
-    galleryRef.current.classList.add('is-dragging')
-    galleryStartX.current = e.pageX - galleryRef.current.offsetLeft
-    galleryScrollLeftStart.current = galleryRef.current.scrollLeft
-  }
+    if (!galleryRef.current) return;
+    isGalleryDragging.current = true;
+    galleryRef.current.classList.add("is-dragging");
+    galleryStartX.current = e.pageX - galleryRef.current.offsetLeft;
+    galleryScrollLeftStart.current = galleryRef.current.scrollLeft;
+  };
 
   const onGalleryMouseMove = (e: React.MouseEvent) => {
-    if (!isGalleryDragging.current || !galleryRef.current) return
-    e.preventDefault()
-    const x = e.pageX - galleryRef.current.offsetLeft
-    const walk = (x - galleryStartX.current) * 1.5
-    galleryRef.current.scrollLeft = galleryScrollLeftStart.current - walk
-  }
+    if (!isGalleryDragging.current || !galleryRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - galleryRef.current.offsetLeft;
+    const walk = (x - galleryStartX.current) * 1.5;
+    galleryRef.current.scrollLeft = galleryScrollLeftStart.current - walk;
+  };
 
   const onGalleryMouseUpOrLeave = () => {
-    isGalleryDragging.current = false
-    galleryRef.current?.classList.remove('is-dragging')
-  }
+    isGalleryDragging.current = false;
+    galleryRef.current?.classList.remove("is-dragging");
+  };
 
   // Testimonials Carousel scroll sync
   const updateTestimonialState = () => {
-    if (!testimonialCarouselRef.current) return
-    const { scrollLeft, scrollWidth, clientWidth } = testimonialCarouselRef.current
-    const maxScroll = scrollWidth - clientWidth
-    setCanScrollLeft(scrollLeft > 10)
-    setCanScrollRight(scrollLeft < maxScroll - 10)
+    if (!testimonialCarouselRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } =
+      testimonialCarouselRef.current;
+    const maxScroll = scrollWidth - clientWidth;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft < maxScroll - 10);
 
     // Calculate active page based on card width
     const cardWidth = testimonialCarouselRef.current.firstElementChild
-      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement).offsetWidth + 24
-      : 300
-    const page = Math.round(scrollLeft / cardWidth)
-    setActiveTestimonialPage(Math.min(testimonials.length - 1, Math.max(0, page)))
-  }
+      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement)
+          .offsetWidth + 24
+      : 300;
+    const page = Math.round(scrollLeft / cardWidth);
+    setActiveTestimonialPage(
+      Math.min(testimonials.length - 1, Math.max(0, page)),
+    );
+  };
 
-  const scrollTestimonials = (direction: 'left' | 'right') => {
-    if (!testimonialCarouselRef.current) return
+  const scrollTestimonials = (direction: "left" | "right") => {
+    if (!testimonialCarouselRef.current) return;
     const cardWidth = testimonialCarouselRef.current.firstElementChild
-      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement).offsetWidth + 24
-      : 320
-    const delta = direction === 'left' ? -cardWidth : cardWidth
-    testimonialCarouselRef.current.scrollBy({ left: delta, behavior: 'smooth' })
-  }
+      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement)
+          .offsetWidth + 24
+      : 320;
+    const delta = direction === "left" ? -cardWidth : cardWidth;
+    testimonialCarouselRef.current.scrollBy({
+      left: delta,
+      behavior: "smooth",
+    });
+  };
 
   const jumpToTestimonial = (index: number) => {
-    if (!testimonialCarouselRef.current) return
+    if (!testimonialCarouselRef.current) return;
     const cardWidth = testimonialCarouselRef.current.firstElementChild
-      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement).offsetWidth + 24
-      : 320
-    testimonialCarouselRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' })
-  }
+      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement)
+          .offsetWidth + 24
+      : 320;
+    testimonialCarouselRef.current.scrollTo({
+      left: index * cardWidth,
+      behavior: "smooth",
+    });
+  };
+
+  // Auto-scrolling testimonials slider: advances on a timer, pauses while
+  // the visitor is hovering or has just interacted manually, loops back to
+  // the start once it reaches the end.
+  const isTestimonialHovering = useRef(false);
+  const testimonialLastInteraction = useRef(0);
+  const pauseTestimonialAutoScroll = () => {
+    testimonialLastInteraction.current = Date.now();
+  };
+
+  useEffect(() => {
+    if (testimonials.length <= 1) return;
+    const AUTO_SCROLL_INTERVAL_MS = 1500;
+    const RESUME_AFTER_INTERACTION_MS = 3000;
+
+    const interval = setInterval(() => {
+      if (isTestimonialHovering.current) return;
+      if (
+        Date.now() - testimonialLastInteraction.current <
+        RESUME_AFTER_INTERACTION_MS
+      )
+        return;
+
+      const el = testimonialCarouselRef.current;
+      if (!el) return;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      if (el.scrollLeft >= maxScroll - 10) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollTestimonials("right");
+      }
+    }, AUTO_SCROLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowStickyCta(window.scrollY > 600)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+      setShowStickyCta(window.scrollY > 600);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Parallax scroll sync for Section 5: whichever USP item crosses the
+  // viewport's center band becomes active, driving both the image crossfade
+  // and the text emphasis.
+  useEffect(() => {
+    const items = uspItemRefs.current.filter(
+      (el): el is HTMLDivElement => el !== null,
+    );
+    if (items.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const index = Number((entry.target as HTMLElement).dataset.uspIndex);
+          if (!Number.isNaN(index)) setActiveUsp(index);
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    );
+
+    items.forEach((item) => observer.observe(item));
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
+    const hash = window.location.hash.replace("#", "");
     if (hash) {
-      const el = document.getElementById(hash)
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
     }
-  }, [])
+  }, []);
 
   return (
     <main id="top" className="landing-main">
@@ -267,44 +429,46 @@ export default function Home() {
             ================================================== */}
         <section className="hero" aria-label="Hero Introduction">
           <div className="hero-copy reveal">
-            <div className="hero-badge">
-              <Sparkles size={13} className="text-terracotta" />
-              <span>Private Chef &amp; Premium Catering</span>
-            </div>
             <h1>
               <em>Taste</em>
               <br />
               <strong>THE SEASON</strong>
             </h1>
+            <svg
+              className="hero-underline"
+              viewBox="0 0 200 18"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 13C42 3 84 3 116 9C148 15 178 15 196 6"
+                stroke="currentColor"
+                strokeWidth="5"
+                strokeLinecap="round"
+              />
+            </svg>
             <p className="hero-text">
-              Seasonal French cuisine, prepared with precision and served with warmth. For tables
-              worth gathering around across Abu Dhabi, Dubai, and the UAE.
+              Seasonal French cuisine, prepared with precision and served with
+              warmth — for every table, every occasion, across Abu Dhabi, Dubai,
+              and the UAE.
             </p>
             <div className="hero-actions">
-              <Link className="book-button" href="/book">
+              <Link className="book-button book-button--light" href="/book">
                 Start your catering order <ArrowRight size={16} />
               </Link>
-              <Link className="outline-button" href="#services">
-                Explore services
-              </Link>
-            </div>
-            <div className="hero-meta">
-              <span className="hero-note">Abu Dhabi · Dubai · UAE Nationwide</span>
-              <span className="hero-subnote">Private Dinners · Corporate Gatherings · Milestones</span>
             </div>
           </div>
 
           <div className="hero-visual">
-            <AssetPlaceholder
-              label="[IMAGE PLACEHOLDER — HERO: SIGNATURE SEASONAL DINING]"
-              dimensionsHint="Desktop 16:9 / 4:5 · High-end table setting & dishes"
+            <Image
+              src="/images/hero.avif"
+              alt="Signature seasonal dining spread"
+              fill
+              priority
               className="hero-placeholder"
+              sizes="(max-width: 768px) 100vw, 66vw"
             />
           </div>
-
-          <a href="#food-marquee" className="hero-scroll" aria-label="Scroll to discover">
-            <ArrowDown size={15} /> Scroll to discover
-          </a>
         </section>
 
         {/* ==================================================
@@ -329,7 +493,11 @@ export default function Home() {
             ))}
             {/* Duplicated set for continuous seamless loop */}
             {circularFoodImages.map((dish, i) => (
-              <div key={`dish-b-${i}`} className="food-marquee__item" aria-hidden="true">
+              <div
+                key={`dish-b-${i}`}
+                className="food-marquee__item"
+                aria-hidden="true"
+              >
                 <AssetPlaceholder
                   label={dish.label}
                   shape="circle"
@@ -344,7 +512,11 @@ export default function Home() {
         {/* ==================================================
             SECTION 4: SERVICES / OFFERINGS SECTION
             ================================================== */}
-        <section id="services" className="section-pad services" aria-label="Our Catering Services">
+        <section
+          id="services"
+          className="section-pad services"
+          aria-label="Our Catering Services"
+        >
           <div className="section-intro reveal">
             <p className="eyebrow">What We Do</p>
             <h2>
@@ -353,8 +525,9 @@ export default function Home() {
               <em>Great company.</em>
             </h2>
             <p>
-              From an intimate dinner at home to executive summits and milestone receptions, we shape
-              every menu to make hosting feel effortlessly elegant.
+              From an intimate dinner at home to executive summits and milestone
+              receptions, we shape every menu to make hosting feel effortlessly
+              elegant.
             </p>
             <div className="section-intro__cta">
               <Link className="text-link" href="/book">
@@ -381,15 +554,18 @@ export default function Home() {
                   <em>gatherings</em>
                 </h3>
                 <p>
-                  Thoughtful food and seamless service for product launches, executive dinners, VIP
-                  hospitality, and office summits.
+                  Thoughtful food and seamless service for product launches,
+                  executive dinners, VIP hospitality, and office summits.
                 </p>
                 <div className="service-tags">
                   <span>Canapés &amp; Finger Food</span>
                   <span>Luxury Buffets</span>
                   <span>Afternoon Tea</span>
                 </div>
-                <Link className="book-button service-btn" href="/book?type=corporate">
+                <Link
+                  className="book-button service-btn"
+                  href="/book?type=corporate"
+                >
                   Plan your corporate event <ArrowRight size={15} />
                 </Link>
               </div>
@@ -412,15 +588,19 @@ export default function Home() {
                   <em>occasions</em>
                 </h3>
                 <p>
-                  Beautifully composed menus and private chef service for weddings, anniversaries, and
-                  milestones that deserve unforgettable care.
+                  Beautifully composed menus and private chef service for
+                  weddings, anniversaries, and milestones that deserve
+                  unforgettable care.
                 </p>
                 <div className="service-tags">
                   <span>Plated Multi-Course</span>
                   <span>Live Chef Stations</span>
                   <span>Custom Themed Menus</span>
                 </div>
-                <Link className="book-button service-btn" href="/book?type=private">
+                <Link
+                  className="book-button service-btn"
+                  href="/book?type=private"
+                >
                   Make it memorable <ArrowRight size={15} />
                 </Link>
               </div>
@@ -431,30 +611,51 @@ export default function Home() {
         {/* ==================================================
             SECTION 5: WHY US / BRAND USPS SECTION
             ================================================== */}
-        <section id="usps" className="section-pad usps" aria-label="Why Choose La Cuisine de Manou">
+        <section
+          id="usps"
+          className="section-pad usps"
+          aria-label="Why Choose La Cuisine de Manou"
+        >
           <div className="usp-visual">
-            <AssetPlaceholder
-              label="[IMAGE PLACEHOLDER — CHEF & ATELIER KITCHEN]"
-              dimensionsHint="Ratio 3:4 · Chef Manou crafting dishes in kitchen"
-              className="usp-placeholder"
-            />
+            {usps.map((item, index) => (
+              <div
+                key={item.num}
+                className={`usp-visual__frame ${activeUsp === index ? "is-active" : ""}`}
+              >
+                <AssetPlaceholder
+                  label={item.imageLabel}
+                  dimensionsHint={item.imageHint}
+                  className="usp-placeholder"
+                />
+              </div>
+            ))}
           </div>
 
           <div className="usp-copy reveal">
-            <p className="eyebrow">Why Choose Us</p>
-            <h2>
-              More than
-              <br />
-              <em>a meal.</em>
-            </h2>
-            <p className="usp-lead">
-              We believe the best hosting is felt, not fussed over. Every menu, gesture, and detail is
-              considered so you can be fully present with your guests.
-            </p>
+            <div className="usp-copy__header">
+              <p className="eyebrow">Why Choose Us</p>
+              <h2>
+                More than
+                <br />
+                <em>a meal.</em>
+              </h2>
+              <p className="usp-lead">
+                We believe the best hosting is felt, not fussed over. Every
+                menu, gesture, and detail is considered so you can be fully
+                present with your guests.
+              </p>
+            </div>
 
             <div className="usp-list">
-              {usps.map((item) => (
-                <div key={item.num} className="usp-item">
+              {usps.map((item, index) => (
+                <div
+                  key={item.num}
+                  ref={(el) => {
+                    uspItemRefs.current[index] = el;
+                  }}
+                  data-usp-index={index}
+                  className={`usp-item ${activeUsp === index ? "is-active" : ""}`}
+                >
                   <span className="usp-num">{item.num}</span>
                   <div className="usp-text">
                     <strong>{item.title}</strong>
@@ -475,14 +676,19 @@ export default function Home() {
         {/* ==================================================
             SECTION 6: SCROLLING GALLERY
             ================================================== */}
-        <section id="gallery" className="gallery-section" aria-label="Scrolling Visual Gallery">
+        <section
+          id="gallery"
+          className="gallery-section"
+          aria-label="Scrolling Visual Gallery"
+        >
           <div className="gallery-header text-center">
             <p className="eyebrow">Experience &amp; Atmosphere</p>
             <h2>
               <em>Gallery</em>
             </h2>
             <p className="gallery-subhead">
-              A glimpse into our private chef tables, milestone celebrations, and bespoke catering moments.
+              A glimpse into our private chef tables, milestone celebrations,
+              and bespoke catering moments.
             </p>
           </div>
 
@@ -533,7 +739,9 @@ export default function Home() {
           <div className="testimonials-header">
             <p className="eyebrow">Social Proof &amp; Trust</p>
             <h2>Customer testimonials</h2>
-            <p className="testimonials-subtitle">What our customers are saying...</p>
+            <p className="testimonials-subtitle">
+              What our customers are saying...
+            </p>
           </div>
 
           {/* Testimonial Cards Carousel Row */}
@@ -544,12 +752,22 @@ export default function Home() {
             aria-label="Customer reviews carousel"
             tabIndex={0}
             onScroll={updateTestimonialState}
+            onMouseEnter={() => {
+              isTestimonialHovering.current = true;
+            }}
+            onMouseLeave={() => {
+              isTestimonialHovering.current = false;
+            }}
+            onTouchStart={pauseTestimonialAutoScroll}
           >
             {testimonials.map((item) => (
               <article key={item.id} className="testimonial-box">
                 <div className="testimonial-box__top">
-                  <div className="stars-row" aria-label={`${item.rating} out of 5 stars`}>
-                    {'★'.repeat(item.rating)}
+                  <div
+                    className="stars-row"
+                    aria-label={`${item.rating} out of 5 stars`}
+                  >
+                    {"★".repeat(item.rating)}
                   </div>
                 </div>
 
@@ -565,7 +783,18 @@ export default function Home() {
                 </div>
 
                 <div className="testimonial-box__name-bar">
-                  <strong>{item.name}</strong>
+                  {item.link ? (
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="testimonial-box__name-link"
+                    >
+                      <strong>{item.name}</strong>
+                    </a>
+                  ) : (
+                    <strong>{item.name}</strong>
+                  )}
                   <span>{item.event}</span>
                 </div>
               </article>
@@ -574,7 +803,11 @@ export default function Home() {
 
           {/* Navigation Controls: Dots on Left, Arrow Buttons on Right */}
           <div className="testimonials-controls">
-            <div className="testimonials-dots" role="tablist" aria-label="Testimonial pages">
+            <div
+              className="testimonials-dots"
+              role="tablist"
+              aria-label="Testimonial pages"
+            >
               {testimonials.map((_, dotIdx) => (
                 <button
                   key={dotIdx}
@@ -582,19 +815,28 @@ export default function Home() {
                   role="tab"
                   aria-label={`Go to review ${dotIdx + 1}`}
                   aria-selected={activeTestimonialPage === dotIdx}
-                  className={`testimonial-dot ${activeTestimonialPage === dotIdx ? 'is-active' : ''}`}
-                  onClick={() => jumpToTestimonial(dotIdx)}
+                  className={`testimonial-dot ${activeTestimonialPage === dotIdx ? "is-active" : ""}`}
+                  onClick={() => {
+                    pauseTestimonialAutoScroll();
+                    jumpToTestimonial(dotIdx);
+                  }}
                 />
               ))}
             </div>
 
-            <div className="testimonials-arrows" aria-label="Carousel navigation">
+            <div
+              className="testimonials-arrows"
+              aria-label="Carousel navigation"
+            >
               <button
                 type="button"
                 className="carousel-circle-btn"
                 aria-label="Previous testimonials"
                 disabled={!canScrollLeft}
-                onClick={() => scrollTestimonials('left')}
+                onClick={() => {
+                  pauseTestimonialAutoScroll();
+                  scrollTestimonials("left");
+                }}
               >
                 <ChevronLeft size={20} />
               </button>
@@ -603,7 +845,10 @@ export default function Home() {
                 className="carousel-circle-btn"
                 aria-label="Next testimonials"
                 disabled={!canScrollRight}
-                onClick={() => scrollTestimonials('right')}
+                onClick={() => {
+                  pauseTestimonialAutoScroll();
+                  scrollTestimonials("right");
+                }}
               >
                 <ChevronRight size={20} />
               </button>
@@ -620,7 +865,10 @@ export default function Home() {
             aria-label={`Full review by ${selectedReviewModal.name}`}
             onClick={() => setSelectedReviewModal(null)}
           >
-            <div className="review-modal-panel" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="review-modal-panel"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 className="review-modal-close"
@@ -629,14 +877,28 @@ export default function Home() {
               >
                 <X size={20} />
               </button>
-              <div className="stars-row" aria-label={`${selectedReviewModal.rating} stars`}>
-                {'★'.repeat(selectedReviewModal.rating)}
+              <div
+                className="stars-row"
+                aria-label={`${selectedReviewModal.rating} stars`}
+              >
+                {"★".repeat(selectedReviewModal.rating)}
               </div>
               <blockquote className="review-modal-quote">
                 “{selectedReviewModal.quote}”
               </blockquote>
               <div className="review-modal-footer">
-                <strong>{selectedReviewModal.name}</strong>
+                {selectedReviewModal.link ? (
+                  <a
+                    href={selectedReviewModal.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="testimonial-box__name-link"
+                  >
+                    <strong>{selectedReviewModal.name}</strong>
+                  </a>
+                ) : (
+                  <strong>{selectedReviewModal.name}</strong>
+                )}
                 <span>{selectedReviewModal.event}</span>
               </div>
             </div>
@@ -651,18 +913,20 @@ export default function Home() {
             <p className="eyebrow">Your Occasion, Considered</p>
             <h2>
               Let&apos;s make
-              <br />
-              <em>something memorable.</em>
+              <em> something memorable.</em>
             </h2>
             <p className="booking-banner__text">
-              Share your date, guest count, and culinary preferences. We’ll curate an unforgettable
-              gathering.
+              Share your date, guest count, and culinary preferences. We’ll
+              curate an unforgettable gathering.
             </p>
             <div className="booking-banner__actions">
               <Link className="book-button book-button--light" href="/book">
                 Tell us about your event <ArrowRight size={16} />
               </Link>
-              <Link className="outline-button outline-button--light" href="/contact">
+              <Link
+                className="outline-button outline-button--light"
+                href="/contact"
+              >
                 Have a quick question?
               </Link>
             </div>
@@ -672,7 +936,11 @@ export default function Home() {
         {/* ==================================================
             SECTION 9: FAQ ACCORDION SECTION
             ================================================== */}
-        <section id="faq" className="section-pad faq-section" aria-label="Frequently Asked Questions">
+        <section
+          id="faq"
+          className="section-pad faq-section"
+          aria-label="Frequently Asked Questions"
+        >
           <div className="faq-intro">
             <p className="eyebrow">Questions, Answered</p>
             <h2>
@@ -681,7 +949,8 @@ export default function Home() {
               <em>know.</em>
             </h2>
             <p>
-              Have a specific inquiry about locations, setup, menus, or service staff?
+              Have a specific inquiry about locations, setup, menus, or service
+              staff?
             </p>
             <Link className="text-link" href="/contact">
               Submit a custom question <ArrowRight size={15} />
@@ -690,9 +959,9 @@ export default function Home() {
 
           <div className="faq-list" role="region" aria-label="FAQ Accordion">
             {faqs.map((faq, i) => {
-              const isOpen = activeFaq === i
-              const faqId = `faq-answer-${i}`
-              const btnId = `faq-button-${i}`
+              const isOpen = activeFaq === i;
+              const faqId = `faq-answer-${i}`;
+              const btnId = `faq-button-${i}`;
               return (
                 <div className="faq-item" key={faq.q}>
                   <button
@@ -708,12 +977,17 @@ export default function Home() {
                     </span>
                   </button>
                   {isOpen && (
-                    <div id={faqId} role="region" aria-labelledby={btnId} className="faq-answer">
+                    <div
+                      id={faqId}
+                      role="region"
+                      aria-labelledby={btnId}
+                      className="faq-answer"
+                    >
                       <p>{faq.a}</p>
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         </section>
@@ -721,32 +995,34 @@ export default function Home() {
         {/* ==================================================
             SECTION 10: CONTACT / PRE-FOOTER INQUIRY SECTION
             ================================================== */}
-        <section id="contact" className="section-pad contact" aria-label="Contact and Inquiries">
-          <div className="contact-heading">
+        <section className="contact-banner" aria-label="Contact and Inquiries">
+          <div className="contact-banner__inner">
             <p className="eyebrow">Start a Conversation</p>
             <h2>
               Gather
-              <br />
-              <em>beautifully.</em>
+              <em> beautifully.</em>
             </h2>
-          </div>
-
-          <div className="contact-copy">
-            <p>
-              Tell us a little about your occasion and we&apos;ll come back to you with bespoke ideas,
-              availability, and a seasonal menu crafted just for your guests.
+            <p className="contact-banner__text">
+              Tell us a little about your occasion and we&apos;ll come back to
+              you with bespoke ideas, availability, and a seasonal menu crafted
+              just for your guests.
             </p>
-            <div className="contact-actions">
-              <Link className="book-button" href="/book">
+            <div className="contact-banner__actions">
+              <Link className="book-button book-button--light" href="/book">
                 Book now <ArrowRight size={16} />
               </Link>
-              <Link className="outline-button" href="/contact">
+              <Link
+                className="outline-button outline-button--light"
+                href="/contact"
+              >
                 Contact us <ArrowRight size={16} />
               </Link>
             </div>
-            <div className="contact-channels-note">
+            <div className="contact-banner__note">
               <span>Direct inquiries: </span>
-              <a href="mailto:bonjour@lacuisinedemanou.fr">bonjour@lacuisinedemanou.fr</a>
+              <a href="mailto:bonjour@lacuisinedemanou.fr">
+                bonjour@lacuisinedemanou.fr
+              </a>
               <span> · </span>
               <a href="tel:+971500000000">+971 50 000 0000</a>
             </div>
@@ -758,7 +1034,7 @@ export default function Home() {
           STICKY CONVERSION BAR (Scroll Activated)
           ================================================== */}
       <aside
-        className={`sticky-cta-bar ${showStickyCta ? 'is-visible' : ''}`}
+        className={`sticky-cta-bar ${showStickyCta ? "is-visible" : ""}`}
         aria-label="Quick booking actions"
       >
         <div className="sticky-cta-bar__content">
@@ -779,5 +1055,5 @@ export default function Home() {
 
       <SiteFooter />
     </main>
-  )
+  );
 }
