@@ -145,15 +145,15 @@ const fallbackTestimonials: Testimonial[] = [
 const faqs = [
   {
     q: "What areas across the UAE do you serve?",
-    a: "We provide full-service catering and private chef experiences across Abu Dhabi, Dubai, and the wider Emirates. For special destination celebrations or private estates, we accommodate custom travel arrangements.",
+    a: "We provide full-service catering and private chef experiences across Abu Dhabi, Dubai, and the wider Emirates.",
   },
   {
-    q: "How far in advance should we reserve our date?",
-    a: "We recommend inquiring 3–6 weeks in advance for intimate private dining and 2–3 months in advance for larger corporate events or weddings. We also accommodate short-notice requests based on calendar availability.",
+    q: "How far should we reserve our date?",
+    a: "We recommend reserving Thanksgiving, Christmas, NYE, and Ramadan catering 4–6 weeks in advance and also large corporate events should ideally be booked 4–6 weeks ahead. For weddings, we recommend reserving 2–3 months in advance, and for other events, 3–4 weeks in advance is recommended. We also accommodate short-notice requests subject to availability.",
   },
   {
     q: "Can dietary preferences and allergies be accommodated?",
-    a: "Every menu is bespoke. We curate dedicated menus for vegetarian, vegan, gluten-free, dairy-free, halal-certified, and specific allergy requirements without compromising culinary craftsmanship.",
+    a: "Every menu is bespoke. We curate dedicated menus for vegetarian, vegan, gluten-free, dairy-free, and specific allergy requirements without compromising culinary craftsmanship.",
   },
   {
     q: "Do you provide full front-of-house service staff and tableware?",
@@ -161,36 +161,36 @@ const faqs = [
   },
   {
     q: "What is the booking and consultation process?",
-    a: "You submit your event details through our online booking wizard. Within 24 hours, our culinary team contacts you with bespoke menu proposals, format recommendations, and an itemized quote.",
+    a: "You submit your event details through our online booking wizard. Within 48 hours, our culinary team contacts you with bespoke menu proposals, format recommendations, and an itemized quote.",
   },
 ];
 
 const usps = [
   {
     num: "01",
-    title: "Seasonal by nature",
-    desc: "Bespoke menus driven by fresh market arrivals and authentic French gastronomic traditions.",
+    title: "Personalized touch",
+    desc: "Our menus are tailored to your taste, event, and needs. Choose from our culinary offerings and customize your selections and quantities to create a celebration that feels uniquely yours.",
     imageLabel: "[IMAGE PLACEHOLDER — MARKET-FRESH SEASONAL PRODUCE]",
     imageHint: "Ratio 3:4 · Chef selecting seasonal ingredients",
   },
   {
     num: "02",
-    title: "Personal by design",
-    desc: "Tailored specifically to your occasion, dietary needs, guest profile, and aesthetic vision.",
+    title: "Premium Quality",
+    desc: "We source quality ingredients from trusted suppliers to create exquisite dishes and beautifully presented buffets ensuring exceptional taste and memorable dining moments.",
     imageLabel: "[IMAGE PLACEHOLDER — MENU CONSULTATION WITH CLIENT]",
     imageHint: "Ratio 3:4 · Chef Manou tailoring a bespoke menu",
   },
   {
     num: "03",
-    title: "Seamless in practice",
-    desc: "Calm, disciplined hospitality and flawless execution from initial briefing to final clearing.",
+    title: "Expert Team",
+    desc: "Our skilled chefs and professional service team bring expertise, care, and attention to detail to every occasion creating an unforgettable gathering.",
     imageLabel: "[IMAGE PLACEHOLDER — SERVICE TEAM IN ACTION]",
     imageHint: "Ratio 3:4 · Flawless on-site event execution",
   },
   {
     num: "04",
-    title: "Uncompromising excellence",
-    desc: "High-end ingredients, refined presentation, and zero-stress coordination for the host.",
+    title: "Full-Service Catering",
+    desc: "From buffet setup, tables, seating, and tableware to glassware and LED based equipment, we take care of every detail from start to finish allowing you to enjoy a truly effortless occasion.",
     imageLabel: "[IMAGE PLACEHOLDER — PLATED SIGNATURE DISH]",
     imageHint: "Ratio 3:4 · Refined final plating detail",
   },
@@ -430,9 +430,9 @@ export default function Home() {
         <section className="hero" aria-label="Hero Introduction">
           <div className="hero-copy reveal">
             <h1>
-              <em>Taste</em>
+              <em>Luxury </em>
               <br />
-              <strong>THE SEASON</strong>
+              <strong>GOURMET CATERING </strong>
             </h1>
             <svg
               className="hero-underline"
@@ -448,13 +448,15 @@ export default function Home() {
               />
             </svg>
             <p className="hero-text">
-              Seasonal French cuisine, prepared with precision and served with
-              warmth — for every table, every occasion, across Abu Dhabi, Dubai,
-              and the UAE.
+              Exceptional dining inspired by authentic flavors and warm
+              hospitality. Thoughtfully tailored for every occasion from
+              intimate gatherings to grand celebrations across Dubai, Abu Dhabi,
+              and the wider UAE.
             </p>
             <div className="hero-actions">
               <Link className="book-button book-button--light" href="/book">
-                Start your catering order <ArrowRight size={16} />
+                Book now
+                <ArrowRight size={16} />
               </Link>
             </div>
           </div>
@@ -518,20 +520,19 @@ export default function Home() {
           aria-label="Our Catering Services"
         >
           <div className="section-intro reveal">
-            <p className="eyebrow">What We Do</p>
-            <h2>
-              Good food.
-              <br />
-              <em>Great company.</em>
-            </h2>
+            <p className="eyebrow">The Manou Experience</p>
+            <h2>Our Catering Services</h2>
             <p>
-              From an intimate dinner at home to executive summits and milestone
-              receptions, we shape every menu to make hosting feel effortlessly
-              elegant.
+              From corporate gatherings to special celebrations, we create
+              diverse catering experiences designed to make every occasion
+              memorable. Every dish is prepared with care, precision, and a
+              commitment to quality bringing together rich flavors, beautiful
+              presentation, and gracious hospitality for an event your guests
+              will cherish.
             </p>
             <div className="section-intro__cta">
               <Link className="text-link" href="/book">
-                View all catering formats <ArrowRight size={15} />
+                Enquire now <ArrowRight size={15} />
               </Link>
             </div>
           </div>
@@ -548,25 +549,27 @@ export default function Home() {
               </div>
               <div className="service-card__content">
                 <span className="card-number">01 / 02</span>
-                <h3>
-                  Corporate
-                  <br />
-                  <em>gatherings</em>
-                </h3>
+                <h3>Corporate gatherings</h3>
                 <p>
-                  Thoughtful food and seamless service for product launches,
-                  executive dinners, VIP hospitality, and office summits.
+                  We offer prestigious catering for corporate events including
+                  business breakfasts, working lunches, product launches,
+                  executive dinners, VIP hospitality, meetings, and conferences.
+                  Enjoy premium menus and attentive service for every corporate
+                  occasion.
                 </p>
                 <div className="service-tags">
-                  <span>Canapés &amp; Finger Food</span>
-                  <span>Luxury Buffets</span>
-                  <span>Afternoon Tea</span>
+                  <span>Coffee Break </span>
+                  <span>Breakfast </span>
+                  <span>Lunch </span>
+                  <span>Corporate </span>
+                  <span>official Events </span>
+                  <span>Other </span>
                 </div>
                 <Link
                   className="book-button service-btn"
                   href="/book?type=corporate"
                 >
-                  Plan your corporate event <ArrowRight size={15} />
+                  Book now <ArrowRight size={15} />
                 </Link>
               </div>
             </article>
@@ -582,26 +585,28 @@ export default function Home() {
               </div>
               <div className="service-card__content">
                 <span className="card-number">02 / 02</span>
-                <h3>
-                  Special
-                  <br />
-                  <em>occasions</em>
-                </h3>
+                <h3>Private & Special events</h3>
                 <p>
-                  Beautifully composed menus and private chef service for
-                  weddings, anniversaries, and milestones that deserve
-                  unforgettable care.
+                  We create first class catering experiences for weddings,
+                  birthdays, anniversaries, engagements, private parties, and
+                  special celebrations. From exquisite buffet displays to
+                  professional service, our skilled chefs and dedicated team
+                  craft every detail with precision, elegance, and care.
                 </p>
                 <div className="service-tags">
-                  <span>Plated Multi-Course</span>
-                  <span>Live Chef Stations</span>
-                  <span>Custom Themed Menus</span>
+                  <span>Birthday </span>
+                  <span>Anniversary </span>
+                  <span>Wedding </span>
+                  <span>Engagement </span>
+                  <span>Family Gathering</span>
+                  <span>Baby Shower </span>
+                  <span>Other </span>
                 </div>
                 <Link
                   className="book-button service-btn"
                   href="/book?type=private"
                 >
-                  Make it memorable <ArrowRight size={15} />
+                  Book now <ArrowRight size={15} />
                 </Link>
               </div>
             </article>
@@ -633,16 +638,18 @@ export default function Home() {
 
           <div className="usp-copy reveal">
             <div className="usp-copy__header">
-              <p className="eyebrow">Why Choose Us</p>
+              <p className="eyebrow">Why choose La Cuisine de Manou?</p>
               <h2>
                 More than
                 <br />
                 <em>a meal.</em>
               </h2>
               <p className="usp-lead">
-                We believe the best hosting is felt, not fussed over. Every
-                menu, gesture, and detail is considered so you can be fully
-                present with your guests.
+                At La Cuisine de Manou, we believe exceptional catering is about
+                more than great food. It’s about creating moments worth
+                remembering. From the first detail to the final touch, we bring
+                together exceptional cuisine, attentive service, and thoughtful
+                touches to make every occasion special.
               </p>
             </div>
 
@@ -667,7 +674,7 @@ export default function Home() {
 
             <div className="usp-action">
               <Link className="book-button" href="/book">
-                Consult with our chef <ArrowRight size={16} />
+                Plan Your Event <ArrowRight size={16} />
               </Link>
             </div>
           </div>
@@ -687,8 +694,8 @@ export default function Home() {
               <em>Gallery</em>
             </h2>
             <p className="gallery-subhead">
-              A glimpse into our private chef tables, milestone celebrations,
-              and bespoke catering moments.
+              A glimpse into beautifully crafted events and exquisite dining
+              experiences created by La Cuisine de Manou.
             </p>
           </div>
 
@@ -737,11 +744,9 @@ export default function Home() {
           aria-label="Customer Testimonials"
         >
           <div className="testimonials-header">
-            <p className="eyebrow">Social Proof &amp; Trust</p>
+            <p className="eyebrow">Trusted by Our Clients</p>
             <h2>Customer testimonials</h2>
-            <p className="testimonials-subtitle">
-              What our customers are saying...
-            </p>
+            <p className="testimonials-subtitle">Customer Testimonials</p>
           </div>
 
           {/* Testimonial Cards Carousel Row */}
@@ -910,24 +915,22 @@ export default function Home() {
             ================================================== */}
         <section className="booking-banner" aria-label="Call to action">
           <div className="booking-banner__inner">
-            <p className="eyebrow">Your Occasion, Considered</p>
-            <h2>
-              Let&apos;s make
-              <em> something memorable.</em>
-            </h2>
+            <p className="eyebrow">Your Occasion, Our Expertise</p>
+            <h2>Enjoy an elevated catering experience</h2>
             <p className="booking-banner__text">
-              Share your date, guest count, and culinary preferences. We’ll
-              curate an unforgettable gathering.
+              Share your date, guest count, and culinary preferences and we’ll
+              create a tailored catering experience to make your occasion
+              unforgettable.
             </p>
             <div className="booking-banner__actions">
               <Link className="book-button book-button--light" href="/book">
-                Tell us about your event <ArrowRight size={16} />
+                Plan your event <ArrowRight size={16} />
               </Link>
               <Link
                 className="outline-button outline-button--light"
                 href="/contact"
               >
-                Have a quick question?
+                Message us
               </Link>
             </div>
           </div>
@@ -942,18 +945,18 @@ export default function Home() {
           aria-label="Frequently Asked Questions"
         >
           <div className="faq-intro">
-            <p className="eyebrow">Questions, Answered</p>
+            <p className="eyebrow">Frequently Asked Questions</p>
             <h2>
-              Good to
+              Everything You
               <br />
-              <em>know.</em>
+              <em>Need to Know</em>
             </h2>
             <p>
-              Have a specific inquiry about locations, setup, menus, or service
-              staff?
+              Find answers to common questions about our menus, services,
+              events, and catering services.
             </p>
             <Link className="text-link" href="/contact">
-              Submit a custom question <ArrowRight size={15} />
+              Message us <ArrowRight size={15} />
             </Link>
           </div>
 
@@ -997,15 +1000,12 @@ export default function Home() {
             ================================================== */}
         <section className="contact-banner" aria-label="Contact and Inquiries">
           <div className="contact-banner__inner">
-            <p className="eyebrow">Start a Conversation</p>
-            <h2>
-              Gather
-              <em> beautifully.</em>
-            </h2>
+            <p className="eyebrow">Plan Your Event</p>
+            <h2>Let&apos;s create something remarkable</h2>
             <p className="contact-banner__text">
-              Tell us a little about your occasion and we&apos;ll come back to
-              you with bespoke ideas, availability, and a seasonal menu crafted
-              just for your guests.
+              Tell us about your event and we&apos;ll help bring your vision to
+              life with an exquisite catering experience starting from the menu
+              to the final detail.
             </p>
             <div className="contact-banner__actions">
               <Link className="book-button book-button--light" href="/book">
@@ -1015,7 +1015,7 @@ export default function Home() {
                 className="outline-button outline-button--light"
                 href="/contact"
               >
-                Contact us <ArrowRight size={16} />
+                Contact us
               </Link>
             </div>
             <div className="contact-banner__note">

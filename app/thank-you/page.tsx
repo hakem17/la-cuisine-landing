@@ -1,3 +1,4 @@
+import { PhoneCallButton } from '@/components/phone-call-button'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { whatsappLink } from '@/lib/whatsapp'
@@ -36,6 +37,7 @@ export default async function ThankYouPage({
           <a className="book-button" href={wa} target="_blank" rel="noreferrer">
             Chat with us on WhatsApp <ArrowRight size={16} />
           </a>
+          <PhoneCallButton />
           <Link className="outline-button" href="/">
             Back to home
           </Link>

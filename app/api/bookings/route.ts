@@ -43,11 +43,24 @@ export async function POST(request: Request) {
     }
 
     const isVip = data.event_selection === 'VIP Events'
-    const budget = calculateBudget(guests, data.location, isVip)
+    const budget = calculateBudget({
+      eventSelection: data.event_selection,
+      guestCount: guests,
+      location: data.location,
+      isVip,
+    })
+    if (budget.status === 'missing_price') {
+      return NextResponse.json(
+        { success: false, error: 'Pricing not available for this event — please contact us directly.' },
+        { status: 400 },
+      )
+    }
 
     const booking = createBooking({
       event_type: data.event_type,
       event_selection: data.event_selection,
+      additional_services: Array.isArray(data.additional_services) ? data.additional_services : [],
+      additional_services_other: data.additional_services_other || null,
       event_date: data.event_date,
       guest_count: guests,
       location: data.location,

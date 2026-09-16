@@ -6,6 +6,8 @@ export type Booking = {
   booking_id: string
   event_type: string
   event_selection: string
+  additional_services: string
+  additional_services_other: string | null
   event_date: string
   guest_count: number
   location: string
@@ -41,10 +43,19 @@ export type ContactSubmission = {
   created_at: string
 }
 
+export type FoodDeliveryRequest = {
+  id: number
+  request_id: string
+  delivery_date: string
+  delivery_time: string
+  created_at: string
+}
+
 type DatabaseFile = {
   bookings: Booking[]
   date_availability: DateAvailability[]
   contact_submissions: ContactSubmission[]
+  food_delivery_requests: FoodDeliveryRequest[]
 }
 
 const DATA_DIR = process.env.VERCEL
@@ -52,9 +63,10 @@ const DATA_DIR = process.env.VERCEL
   : path.join(process.cwd(), 'data')
 const DB_FILE = path.join(DATA_DIR, 'database.json')
 const CSV_FILE = path.join(process.cwd(), 'data', 'bookings.csv')
+const FOOD_DELIVERY_CSV_FILE = path.join(process.cwd(), 'data', 'food-delivery-requests.csv')
 
 function emptyDb(): DatabaseFile {
-  return { bookings: [], date_availability: [], contact_submissions: [] }
+  return { bookings: [], date_availability: [], contact_submissions: [], food_delivery_requests: [] }
 }
 
 function ensureDir() {
@@ -85,6 +97,7 @@ function readDb(): DatabaseFile {
     return db
   }
   const db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8')) as DatabaseFile
+  db.food_delivery_requests ??= []
   seedDates(db)
   return db
 }
@@ -109,6 +122,8 @@ export function exportBookingsCsv(db?: DatabaseFile) {
     'booking_id',
     'event_type',
     'event_selection',
+    'additional_services',
+    'additional_services_other',
     'event_date',
     'guest_count',
     'location',
@@ -148,6 +163,8 @@ export function exportBookingsCsv(db?: DatabaseFile) {
 export function createBooking(input: {
   event_type: string
   event_selection: string
+  additional_services: string[]
+  additional_services_other: string | null
   event_date: string
   guest_count: number
   location: string
@@ -180,6 +197,8 @@ export function createBooking(input: {
     booking_id,
     event_type: input.event_type,
     event_selection: input.event_selection,
+    additional_services: input.additional_services.join(', '),
+    additional_services_other: input.additional_services_other,
     event_date: input.event_date,
     guest_count: input.guest_count,
     location: input.location,
@@ -230,13 +249,57 @@ export function createContact(input: { question: string; full_name: string; coun
   return row
 }
 
+function exportFoodDeliveryCsv(db?: DatabaseFile) {
+  const data = db ?? readDb()
+  const headers = ['id', 'request_id', 'delivery_date', 'delivery_time', 'created_at']
+  const lines = [headers.join(',')]
+  for (const row of data.food_delivery_requests) {
+    lines.push(
+      headers
+        .map((key) => {
+          const value = row[key as keyof FoodDeliveryRequest]
+          const text = value == null ? '' : String(value)
+          return `"${text.replaceAll('"', '""')}"`
+        })
+        .join(','),
+    )
+  }
+  ensureDir()
+  const csv = lines.join('\n')
+  fs.writeFileSync(FOOD_DELIVERY_CSV_FILE, csv)
+  return { csv, path: FOOD_DELIVERY_CSV_FILE }
+}
+
+// Q1 "Food Delivery" branch: the wizard saves the requested date/time to the
+// spreadsheet before routing the customer to the Contact Us page (no full
+// booking form is collected for this branch, per the PRD).
+export function createFoodDeliveryRequest(input: { delivery_date: string; delivery_time: string }) {
+  const db = readDb()
+  const nextId = db.food_delivery_requests.reduce((max, row) => Math.max(max, row.id), 0) + 1
+  const dateStr = input.delivery_date.replaceAll('-', '')
+  const sameDay = db.food_delivery_requests.filter((r) => r.delivery_date === input.delivery_date).length
+  const request_id = `FD-${dateStr}-${String(sameDay + 1).padStart(3, '0')}`
+  const row: FoodDeliveryRequest = {
+    id: nextId,
+    request_id,
+    delivery_date: input.delivery_date,
+    delivery_time: input.delivery_time,
+    created_at: new Date().toISOString(),
+  }
+  db.food_delivery_requests.push(row)
+  writeDb(db)
+  exportFoodDeliveryCsv(db)
+  return row
+}
+
 export function getAdminData() {
   const db = readDb()
   return {
     bookings: [...db.bookings].reverse(),
     contacts: [...db.contact_submissions].reverse(),
+    food_delivery_requests: [...db.food_delivery_requests].reverse(),
     dates: getAvailableDates(),
   }
 }
 
-export { CSV_FILE }
+export { CSV_FILE, FOOD_DELIVERY_CSV_FILE }

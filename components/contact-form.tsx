@@ -15,8 +15,8 @@ const COUNTRIES = [
   { code: '+44', label: 'UK' },
 ]
 
-export function ContactForm() {
-  const [question, setQuestion] = useState('')
+export function ContactForm({ initialQuestion = '' }: { initialQuestion?: string }) {
+  const [question, setQuestion] = useState(initialQuestion)
   const [fullName, setFullName] = useState('')
   const [countryCode, setCountryCode] = useState('+971')
   const [phone, setPhone] = useState('')

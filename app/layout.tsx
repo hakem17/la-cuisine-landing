@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/next'
+import { ContactWidget } from '@/components/contact-widget'
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Playfair_Display } from 'next/font/google'
 import './globals.css'
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`bg-background ${dmSans.variable} ${playfair.variable}`}>
       <body className={`${dmSans.className} antialiased`}>
         {children}
+        <ContactWidget />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
