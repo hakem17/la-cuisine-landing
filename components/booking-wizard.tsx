@@ -1,8 +1,8 @@
 "use client";
 
+import { PhoneCallButton } from "@/components/phone-call-button";
 import { calculateBudget, formatBudgetRange } from "@/lib/budget";
 import { whatsappLink } from "@/lib/whatsapp";
-import { PhoneCallButton } from "@/components/phone-call-button";
 import {
   ArrowLeft,
   ArrowRight,
@@ -37,7 +37,7 @@ const EVENT_OPTIONS = {
   corporate: [
     "Breakfast & Coffee Break",
     "Finger Food & Canapes",
-    "Afternoon Tea Tower",
+    "Afternoon Tea",
     "Luxury Buffet",
     "Pass Around",
     "Custom Menus & Themed Catering",
@@ -355,7 +355,9 @@ function BookingWizardContent() {
         });
         const data = await res.json();
         if (!res.ok || !data.success) {
-          throw new Error(data.error || "Could not save your delivery request.");
+          throw new Error(
+            data.error || "Could not save your delivery request.",
+          );
         }
       } catch (err) {
         setSubmittingDelivery(false);
@@ -416,9 +418,7 @@ function BookingWizardContent() {
           additional_services: form.additional_services.filter(
             (s) => s !== "Other",
           ),
-          additional_services_other: form.additional_services.includes(
-            "Other",
-          )
+          additional_services_other: form.additional_services.includes("Other")
             ? form.additional_services_other
             : null,
           event_date: form.event_date,
@@ -497,18 +497,18 @@ function BookingWizardContent() {
   return (
     <form className="wizard" onSubmit={onSubmit}>
       {form.event_type !== "food_delivery" && (
-      <ol className="step-bar" aria-label="Booking progress">
-        {STEPS.map((label, index) => {
-          const n = index + 1;
-          const state = n < step ? "done" : n === step ? "current" : "todo";
-          return (
-            <li key={label} className={`step-dot step-dot--${state}`}>
-              <span>{state === "done" ? <Check size={14} /> : n}</span>
-              <em>{label}</em>
-            </li>
-          );
-        })}
-      </ol>
+        <ol className="step-bar" aria-label="Booking progress">
+          {STEPS.map((label, index) => {
+            const n = index + 1;
+            const state = n < step ? "done" : n === step ? "current" : "todo";
+            return (
+              <li key={label} className={`step-dot step-dot--${state}`}>
+                <span>{state === "done" ? <Check size={14} /> : n}</span>
+                <em>{label}</em>
+              </li>
+            );
+          })}
+        </ol>
       )}
 
       {/* ==================================================
@@ -653,9 +653,7 @@ function BookingWizardContent() {
                   type="button"
                   key={item}
                   className={`choice-card choice-card--compact ${
-                    form.additional_services.includes(item)
-                      ? "is-selected"
-                      : ""
+                    form.additional_services.includes(item) ? "is-selected" : ""
                   }`}
                   onClick={() => toggleService(item)}
                 >
@@ -829,8 +827,7 @@ function BookingWizardContent() {
                   {form.location === "Other"
                     ? form.location_other || "Other UAE Location"
                     : form.location || "your location"}
-                  {isVip && " · VIP Event multiplier applied"} · drag to
-                  adjust
+                  {isVip && " · VIP Event multiplier applied"} · drag to adjust
                 </>
               ) : (
                 "Our team will confirm your budget directly — please go back and choose a different event, or contact us."
@@ -881,7 +878,9 @@ function BookingWizardContent() {
                       Number(e.target.value),
                       budgetRange.min,
                     );
-                    setBudgetRange((prev) => (prev ? { ...prev, max: value } : prev));
+                    setBudgetRange((prev) =>
+                      prev ? { ...prev, max: value } : prev,
+                    );
                   }}
                 />
               </div>

@@ -149,7 +149,7 @@ const faqs = [
   },
   {
     q: "How far should we reserve our date?",
-    a: "We recommend reserving Thanksgiving, Christmas, NYE, and Ramadan catering 4–6 weeks in advance and also large corporate events should ideally be booked 4–6 weeks ahead. For weddings, we recommend reserving 2–3 months in advance, and for other events, 3–4 weeks in advance is recommended. We also accommodate short-notice requests subject to availability.",
+    a: "We recommend booking Thanksgiving, Christmas, New Year’s Eve, Ramadan Iftar and Suhoor, and large corporate events 4–6 weeks in advance. For weddings, we suggest booking 2–3 months ahead, while other events are best booked 3–4 weeks in advance.We’re also happy to accommodate short-notice requests, subject to availability.",
   },
   {
     q: "Can dietary preferences and allergies be accommodated?",
@@ -520,7 +520,7 @@ export default function Home() {
           aria-label="Our Catering Services"
         >
           <div className="section-intro reveal">
-            <p className="eyebrow">The Manou Experience</p>
+            {/* <p className="eyebrow">The Manou Experience</p> */}
             <h2>Our Catering Services</h2>
             <p>
               From corporate gatherings to special celebrations, we create
@@ -561,7 +561,6 @@ export default function Home() {
                   <span>Coffee Break </span>
                   <span>Breakfast </span>
                   <span>Lunch </span>
-                  <span>Corporate </span>
                   <span>official Events </span>
                   <span>Other </span>
                 </div>
