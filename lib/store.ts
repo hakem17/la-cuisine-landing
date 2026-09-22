@@ -63,8 +63,8 @@ const DATA_DIR = process.env.VERCEL
   ? path.join('/tmp', 'la-cuisine-data')
   : path.join(process.cwd(), 'data')
 const DB_FILE = path.join(DATA_DIR, 'database.json')
-const CSV_FILE = path.join(process.cwd(), 'data', 'bookings.csv')
-const FOOD_DELIVERY_CSV_FILE = path.join(process.cwd(), 'data', 'food-delivery-requests.csv')
+const CSV_FILE = path.join(DATA_DIR, 'bookings.csv')
+const FOOD_DELIVERY_CSV_FILE = path.join(DATA_DIR, 'food-delivery-requests.csv')
 
 function emptyDb(): DatabaseFile {
   return { bookings: [], date_availability: [], contact_submissions: [], food_delivery_requests: [] }
