@@ -40,7 +40,7 @@ export function SiteFooter() {
           <Link className="book-button" href="/book">
             Start your order ↗
           </Link>
-          <Link className="outline-button footer-outline" href="/contact">
+          <Link className="outline-button footer-outline" href="/contact-us">
             Submit a question ↗
           </Link>
         </div>

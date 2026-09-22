@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { appendRowToSheet } from './google-sheets'
 
 export type Booking = {
   id: number
@@ -230,6 +231,7 @@ export function createBooking(input: {
 
   writeDb(db)
   exportBookingsCsv(db)
+  void appendRowToSheet('bookings', booking)
   return booking
 }
 
@@ -246,6 +248,7 @@ export function createContact(input: { question: string; full_name: string; coun
   }
   db.contact_submissions.push(row)
   writeDb(db)
+  void appendRowToSheet('contacts', row)
   return row
 }
 
@@ -289,6 +292,7 @@ export function createFoodDeliveryRequest(input: { delivery_date: string; delive
   db.food_delivery_requests.push(row)
   writeDb(db)
   exportFoodDeliveryCsv(db)
+  void appendRowToSheet('food_delivery_requests', row)
   return row
 }
 

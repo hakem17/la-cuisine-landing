@@ -1,6 +1,5 @@
 "use client";
 
-import { AssetPlaceholder } from "@/components/asset-placeholder";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
@@ -17,69 +16,23 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const circularFoodImages = [
-  {
-    label: "[IMAGE PLACEHOLDER — AMUSE-BOUCHE]",
-    hint: "Circle 1:1 · Artisanal Amuse-Bouche",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — SEASONAL ENTRÉE]",
-    hint: "Circle 1:1 · French Starter Plating",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — SIGNATURE MAIN]",
-    hint: "Circle 1:1 · Herb-Crusted Lamb / Beef",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — ARTISANAL CHEESE]",
-    hint: "Circle 1:1 · Affiné Cheese Selection",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — FRENCH PÂTISSERIE]",
-    hint: "Circle 1:1 · Citrus Tartlet & Pastry",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — CANAPÉ SELECTION]",
-    hint: "Circle 1:1 · Passed Gourmet Canapés",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — TARTARE & SEAFOOD]",
-    hint: "Circle 1:1 · Scallop & Salmon Tartare",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — PETITS FOURS]",
-    hint: "Circle 1:1 · Mignardises & Sweet Treats",
-  },
+  { label: "Artisanal Amuse-Bouche", src: "/images/plates-1.jpg" },
+  { label: "French Starter Plating", src: "/images/plates-2.jpg" },
+  { label: "Herb-Crusted Lamb / Beef", src: "/images/plates-3.jpg" },
+  { label: "Affiné Cheese Selection", src: "/images/plates-4.jpg" },
+  { label: "Citrus Tartlet & Pastry", src: "/images/plates-5.jpg" },
+  { label: "Passed Gourmet Canapés", src: "/images/plates-6.jpg" },
+  { label: "Scallop & Salmon Tartare", src: "/images/plates-7.jpg" },
 ];
 
 const galleryCards = [
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 01: PLATED DINNER TABLE]",
-    hint: "Portrait 9:16 · Candlelit Private Table",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 02: CHEF PLATING & SERVICE]",
-    hint: "Portrait 9:16 · Chef Precision Garnish",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 03: COCKTAIL & CANAPÉ RECEPTION]",
-    hint: "Portrait 9:16 · Passed Hors d’Oeuvres",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 04: LUXURY BUFFET PRESENTATION]",
-    hint: "Portrait 9:16 · Cascading French Buffet",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 05: OUTDOOR ESTATE GATHERING]",
-    hint: "Portrait 9:16 · Al Fresco Dining Setup",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 06: ARTISANAL DESSERT ATELIER]",
-    hint: "Portrait 9:16 · Patisserie & Sweet Display",
-  },
-  {
-    label: "[IMAGE PLACEHOLDER — GALLERY 07: EXECUTIVE BANQUET SETUP]",
-    hint: "Portrait 9:16 · Corporate VIP Banquet",
-  },
+  { label: "Candlelit Private Table", src: "/images/gallery-1.jpg" },
+  { label: "Chef Precision Garnish", src: "/images/gallery-2.jpg" },
+  { label: "Passed Hors d’Oeuvres", src: "/images/gallery-3.jpg" },
+  { label: "Cascading French Buffet", src: "/images/gallery-4.jpg" },
+  { label: "Al Fresco Dining Setup", src: "/images/gallery-5.jpg" },
+  { label: "Patisserie & Sweet Display", src: "/images/gallery-6.jpg" },
+  { label: "Corporate VIP Banquet", src: "/images/gallery-7.jpg" },
 ];
 
 type Testimonial = {
@@ -170,29 +123,29 @@ const usps = [
     num: "01",
     title: "Personalized touch",
     desc: "Our menus are tailored to your taste, event, and needs. Choose from our culinary offerings and customize your selections and quantities to create a celebration that feels uniquely yours.",
-    imageLabel: "[IMAGE PLACEHOLDER — MARKET-FRESH SEASONAL PRODUCE]",
-    imageHint: "Ratio 3:4 · Chef selecting seasonal ingredients",
+    image: "/images/why-choose-us.jpg",
+    imageLabel: "Chef selecting seasonal ingredients",
   },
   {
     num: "02",
     title: "Premium Quality",
     desc: "We source quality ingredients from trusted suppliers to create exquisite dishes and beautifully presented buffets ensuring exceptional taste and memorable dining moments.",
-    imageLabel: "[IMAGE PLACEHOLDER — MENU CONSULTATION WITH CLIENT]",
-    imageHint: "Ratio 3:4 · Chef Manou tailoring a bespoke menu",
+    image: "/images/gallery-8.jpg",
+    imageLabel: "Chef Manou tailoring a bespoke menu",
   },
   {
     num: "03",
     title: "Expert Team",
     desc: "Our skilled chefs and professional service team bring expertise, care, and attention to detail to every occasion creating an unforgettable gathering.",
-    imageLabel: "[IMAGE PLACEHOLDER — SERVICE TEAM IN ACTION]",
-    imageHint: "Ratio 3:4 · Flawless on-site event execution",
+    image: "/images/event-1.jpg",
+    imageLabel: "Flawless on-site event execution",
   },
   {
     num: "04",
     title: "Full-Service Catering",
     desc: "From buffet setup, tables, seating, and tableware to glassware and LED based equipment, we take care of every detail from start to finish allowing you to enjoy a truly effortless occasion.",
-    imageLabel: "[IMAGE PLACEHOLDER — PLATED SIGNATURE DISH]",
-    imageHint: "Ratio 3:4 · Refined final plating detail",
+    image: "/images/event-2.jpg",
+    imageLabel: "Refined final plating detail",
   },
 ];
 
@@ -485,11 +438,12 @@ export default function Home() {
             {/* Primary set of circular food images */}
             {circularFoodImages.map((dish, i) => (
               <div key={`dish-a-${i}`} className="food-marquee__item">
-                <AssetPlaceholder
-                  label={dish.label}
-                  shape="circle"
-                  dimensionsHint={dish.hint}
+                <Image
+                  src={dish.src}
+                  alt={dish.label}
+                  fill
                   className="food-marquee__circle"
+                  sizes="190px"
                 />
               </div>
             ))}
@@ -500,11 +454,12 @@ export default function Home() {
                 className="food-marquee__item"
                 aria-hidden="true"
               >
-                <AssetPlaceholder
-                  label={dish.label}
-                  shape="circle"
-                  dimensionsHint={dish.hint}
+                <Image
+                  src={dish.src}
+                  alt={dish.label}
+                  fill
                   className="food-marquee__circle"
+                  sizes="190px"
                 />
               </div>
             ))}
@@ -541,10 +496,12 @@ export default function Home() {
             {/* Corporate Card */}
             <article className="service-card service-card--corporate reveal">
               <div className="service-card__media">
-                <AssetPlaceholder
-                  label="[IMAGE PLACEHOLDER — CORPORATE CATERING]"
-                  dimensionsHint="Ratio 16:10 · Executive Breakfast, Canapés & Buffets"
+                <Image
+                  src="/images/event-1.jpg"
+                  alt="Corporate catering — executive breakfast, canapés & buffets"
+                  fill
                   className="service-placeholder"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
               <div className="service-card__content">
@@ -576,10 +533,12 @@ export default function Home() {
             {/* Private Occasions Card */}
             <article className="service-card service-card--private reveal">
               <div className="service-card__media">
-                <AssetPlaceholder
-                  label="[IMAGE PLACEHOLDER — SPECIAL OCCASIONS & PRIVATE EVENTS]"
-                  dimensionsHint="Ratio 16:10 · Plated Dinners, Weddings & Celebrations"
+                <Image
+                  src="/images/event-2.jpg"
+                  alt="Private & special events — plated dinners, weddings & celebrations"
+                  fill
                   className="service-placeholder"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
               <div className="service-card__content">
@@ -626,10 +585,12 @@ export default function Home() {
                 key={item.num}
                 className={`usp-visual__frame ${activeUsp === index ? "is-active" : ""}`}
               >
-                <AssetPlaceholder
-                  label={item.imageLabel}
-                  dimensionsHint={item.imageHint}
+                <Image
+                  src={item.image}
+                  alt={item.imageLabel}
+                  fill
                   className="usp-placeholder"
+                  sizes="(max-width: 900px) 100vw, 42vw"
                 />
               </div>
             ))}
@@ -713,10 +674,12 @@ export default function Home() {
             >
               {galleryCards.map((card, idx) => (
                 <div key={idx} className="gallery-card">
-                  <AssetPlaceholder
-                    label={card.label}
-                    dimensionsHint={card.hint}
+                  <Image
+                    src={card.src}
+                    alt={card.label}
+                    fill
                     className="gallery-card__placeholder"
+                    sizes="320px"
                   />
                 </div>
               ))}
@@ -927,7 +890,7 @@ export default function Home() {
               </Link>
               <Link
                 className="outline-button outline-button--light"
-                href="/contact"
+                href="/contact-us"
               >
                 Message us
               </Link>
@@ -954,7 +917,7 @@ export default function Home() {
               Find answers to common questions about our menus, services,
               events, and catering services.
             </p>
-            <Link className="text-link" href="/contact">
+            <Link className="text-link" href="/contact-us">
               Message us <ArrowRight size={15} />
             </Link>
           </div>
@@ -1012,7 +975,7 @@ export default function Home() {
               </Link>
               <Link
                 className="outline-button outline-button--light"
-                href="/contact"
+                href="/contact-us"
               >
                 Contact us
               </Link>
@@ -1045,7 +1008,7 @@ export default function Home() {
             <Link className="book-button sticky-btn" href="/book">
               Book now <ArrowRight size={14} />
             </Link>
-            <Link className="outline-button sticky-btn--subtle" href="/contact">
+            <Link className="outline-button sticky-btn--subtle" href="/contact-us">
               <MessageCircle size={14} /> Inquire
             </Link>
           </div>

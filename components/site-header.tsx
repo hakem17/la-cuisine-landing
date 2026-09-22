@@ -11,7 +11,6 @@ const navItems = [
   { label: 'Gallery', id: 'gallery' },
   { label: 'Reviews', id: 'testimonials' },
   { label: 'FAQ', id: 'faq' },
-  { label: 'Contact', id: 'contact' },
 ]
 
 export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }) {
@@ -113,6 +112,9 @@ export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }
               {label}
             </button>
           ))}
+          <Link href="/contact-us" className="nav-link">
+            Contact
+          </Link>
         </nav>
 
         <div className="header-actions">
@@ -164,12 +166,16 @@ export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }
                   <ArrowRight size={17} />
                 </button>
               ))}
+              <Link href="/contact-us" className="mobile-menu__link" onClick={() => setMenuOpen(false)}>
+                <span>Contact</span>
+                <ArrowRight size={17} />
+              </Link>
             </div>
             <div className="mobile-menu__cta-group">
               <Link href="/book" className="book-button mobile-cta-btn" onClick={() => setMenuOpen(false)}>
                 Book now <ArrowRight size={16} />
               </Link>
-              <Link href="/contact" className="outline-button mobile-cta-btn" onClick={() => setMenuOpen(false)}>
+              <Link href="/contact-us" className="outline-button mobile-cta-btn" onClick={() => setMenuOpen(false)}>
                 Contact us <ArrowRight size={16} />
               </Link>
             </div>
