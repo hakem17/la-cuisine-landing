@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     if (!data.email || !String(data.email).includes('@')) {
       return NextResponse.json({ success: false, error: 'Please enter a valid email address.' }, { status: 400 })
     }
-    createContact({
+    await createContact({
       question: String(data.question).trim(),
       full_name: String(data.full_name).trim(),
       country_code: data.country_code || '+971',

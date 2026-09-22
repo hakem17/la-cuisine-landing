@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const booking = createBooking({
+    const booking = await createBooking({
       event_type: data.event_type,
       event_selection: data.event_selection,
       additional_services: Array.isArray(data.additional_services) ? data.additional_services : [],

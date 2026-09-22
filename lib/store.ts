@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { appendRowToSheet } from './google-sheets'
+import { appendRowToSheet, getSheetRows } from './google-sheets'
 
 export type Booking = {
   id: number
@@ -108,60 +108,88 @@ function writeDb(db: DatabaseFile) {
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2))
 }
 
-export function getAvailableDates() {
-  const db = readDb()
+function nextNDays(n: number) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const days: string[] = []
+  for (let i = 0; i < n; i++) {
+    const date = new Date(today)
+    date.setDate(today.getDate() + i)
+    days.push(date.toISOString().slice(0, 10))
+  }
+  return days
+}
+
+export async function getBookedDates(): Promise<Set<string>> {
+  const rows = await getSheetRows('bookings')
+  return new Set(rows.map((r) => r.event_date).filter(Boolean))
+}
+
+export async function getAvailableDates() {
+  const bookedDates = await getBookedDates()
+  const days = nextNDays(90)
   return {
-    available_dates: db.date_availability.filter((d) => d.status === 'available').map((d) => d.event_date),
-    booked_dates: db.date_availability.filter((d) => d.status === 'booked').map((d) => d.event_date),
+    available_dates: days.filter((d) => !bookedDates.has(d)),
+    booked_dates: days.filter((d) => bookedDates.has(d)),
   }
 }
 
-export function exportBookingsCsv(db?: DatabaseFile) {
-  const data = db ?? readDb()
-  const headers = [
-    'id',
-    'booking_id',
-    'event_type',
-    'event_selection',
-    'additional_services',
-    'additional_services_other',
-    'event_date',
-    'guest_count',
-    'location',
-    'location_other',
-    'budget_min',
-    'budget_max',
-    'cuisine_interests',
-    'cuisine_other',
-    'contact_channel',
-    'channel_other',
-    'full_name',
-    'phone',
-    'email',
-    'company_website',
-    'role',
-    'status',
-    'created_at',
-  ]
+const BOOKINGS_CSV_HEADERS = [
+  'id',
+  'booking_id',
+  'event_type',
+  'event_selection',
+  'additional_services',
+  'additional_services_other',
+  'event_date',
+  'guest_count',
+  'location',
+  'location_other',
+  'budget_min',
+  'budget_max',
+  'cuisine_interests',
+  'cuisine_other',
+  'contact_channel',
+  'channel_other',
+  'full_name',
+  'phone',
+  'email',
+  'company_website',
+  'role',
+  'status',
+  'created_at',
+]
+
+function rowsToCsv(headers: string[], rows: Record<string, unknown>[]) {
   const lines = [headers.join(',')]
-  for (const row of data.bookings) {
+  for (const row of rows) {
     lines.push(
       headers
         .map((key) => {
-          const value = row[key as keyof Booking]
+          const value = row[key]
           const text = value == null ? '' : String(value)
           return `"${text.replaceAll('"', '""')}"`
         })
         .join(','),
     )
   }
+  return lines.join('\n')
+}
+
+export function exportBookingsCsv(db?: DatabaseFile) {
+  const data = db ?? readDb()
+  const csv = rowsToCsv(BOOKINGS_CSV_HEADERS, data.bookings)
   ensureDir()
-  const csv = lines.join('\n')
   fs.writeFileSync(CSV_FILE, csv)
   return { csv, path: CSV_FILE }
 }
 
-export function createBooking(input: {
+export async function exportBookingsCsvFromSheet() {
+  const rows = await getSheetRows('bookings')
+  return rowsToCsv(BOOKINGS_CSV_HEADERS, rows)
+}
+
+export async function createBooking(input: {
   event_type: string
   event_selection: string
   additional_services: string[]
@@ -183,16 +211,16 @@ export function createBooking(input: {
   company_website: string | null
   role: string | null
 }) {
-  const db = readDb()
-  const booked = db.date_availability.find((d) => d.event_date === input.event_date && d.status === 'booked')
+  const existingRows = await getSheetRows('bookings')
+  const booked = existingRows.some((r) => r.event_date === input.event_date)
   if (booked) {
     throw new Error('DATE_UNAVAILABLE')
   }
 
-  const sameDay = db.bookings.filter((b) => b.event_date === input.event_date).length
+  const sameDay = existingRows.filter((r) => r.event_date === input.event_date).length
   const dateStr = input.event_date.replaceAll('-', '')
   const booking_id = `BK-${dateStr}-${String(sameDay + 1).padStart(3, '0')}`
-  const nextId = db.bookings.reduce((max, row) => Math.max(max, row.id), 0) + 1
+  const nextId = existingRows.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1
   const booking: Booking = {
     id: nextId,
     booking_id,
@@ -218,26 +246,23 @@ export function createBooking(input: {
     status: 'pending',
     created_at: new Date().toISOString(),
   }
-  db.bookings.push(booking)
+  await appendRowToSheet('bookings', booking)
 
-  const dateRow = db.date_availability.find((d) => d.event_date === input.event_date)
-  if (dateRow) {
-    dateRow.status = 'booked'
-    dateRow.booking_id = booking_id
-  } else {
-    const dateId = db.date_availability.reduce((max, row) => Math.max(max, row.id), 0) + 1
-    db.date_availability.push({ id: dateId, event_date: input.event_date, status: 'booked', booking_id })
+  try {
+    const db = readDb()
+    db.bookings.push(booking)
+    writeDb(db)
+    exportBookingsCsv(db)
+  } catch {
+    // Local cache is best-effort; Google Sheets is the source of truth.
   }
 
-  writeDb(db)
-  exportBookingsCsv(db)
-  void appendRowToSheet('bookings', booking)
   return booking
 }
 
-export function createContact(input: { question: string; full_name: string; country_code: string; phone: string; email: string }) {
-  const db = readDb()
-  const nextId = db.contact_submissions.reduce((max, row) => Math.max(max, row.id), 0) + 1
+export async function createContact(input: { question: string; full_name: string; country_code: string; phone: string; email: string }) {
+  const existingRows = await getSheetRows('contacts')
+  const nextId = existingRows.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1
   const row: ContactSubmission = {
     id: nextId,
     question: input.question,
@@ -246,9 +271,16 @@ export function createContact(input: { question: string; full_name: string; coun
     email: input.email,
     created_at: new Date().toISOString(),
   }
-  db.contact_submissions.push(row)
-  writeDb(db)
-  void appendRowToSheet('contacts', row)
+  await appendRowToSheet('contacts', row)
+
+  try {
+    const db = readDb()
+    db.contact_submissions.push(row)
+    writeDb(db)
+  } catch {
+    // Local cache is best-effort; Google Sheets is the source of truth.
+  }
+
   return row
 }
 
@@ -276,11 +308,11 @@ function exportFoodDeliveryCsv(db?: DatabaseFile) {
 // Q1 "Food Delivery" branch: the wizard saves the requested date/time to the
 // spreadsheet before routing the customer to the Contact Us page (no full
 // booking form is collected for this branch, per the PRD).
-export function createFoodDeliveryRequest(input: { delivery_date: string; delivery_time: string }) {
-  const db = readDb()
-  const nextId = db.food_delivery_requests.reduce((max, row) => Math.max(max, row.id), 0) + 1
+export async function createFoodDeliveryRequest(input: { delivery_date: string; delivery_time: string }) {
+  const existingRows = await getSheetRows('food_delivery_requests')
+  const nextId = existingRows.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1
   const dateStr = input.delivery_date.replaceAll('-', '')
-  const sameDay = db.food_delivery_requests.filter((r) => r.delivery_date === input.delivery_date).length
+  const sameDay = existingRows.filter((r) => r.delivery_date === input.delivery_date).length
   const request_id = `FD-${dateStr}-${String(sameDay + 1).padStart(3, '0')}`
   const row: FoodDeliveryRequest = {
     id: nextId,
@@ -289,20 +321,32 @@ export function createFoodDeliveryRequest(input: { delivery_date: string; delive
     delivery_time: input.delivery_time,
     created_at: new Date().toISOString(),
   }
-  db.food_delivery_requests.push(row)
-  writeDb(db)
-  exportFoodDeliveryCsv(db)
-  void appendRowToSheet('food_delivery_requests', row)
+  await appendRowToSheet('food_delivery_requests', row)
+
+  try {
+    const db = readDb()
+    db.food_delivery_requests.push(row)
+    writeDb(db)
+    exportFoodDeliveryCsv(db)
+  } catch {
+    // Local cache is best-effort; Google Sheets is the source of truth.
+  }
+
   return row
 }
 
-export function getAdminData() {
-  const db = readDb()
+export async function getAdminData() {
+  const [bookingRows, contactRows, foodDeliveryRows, dates] = await Promise.all([
+    getSheetRows('bookings'),
+    getSheetRows('contacts'),
+    getSheetRows('food_delivery_requests'),
+    getAvailableDates(),
+  ])
   return {
-    bookings: [...db.bookings].reverse(),
-    contacts: [...db.contact_submissions].reverse(),
-    food_delivery_requests: [...db.food_delivery_requests].reverse(),
-    dates: getAvailableDates(),
+    bookings: [...bookingRows].reverse(),
+    contacts: [...contactRows].reverse(),
+    food_delivery_requests: [...foodDeliveryRows].reverse(),
+    dates,
   }
 }
 

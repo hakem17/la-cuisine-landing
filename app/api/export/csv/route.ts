@@ -1,10 +1,10 @@
-import { exportBookingsCsv } from '@/lib/store'
+import { exportBookingsCsvFromSheet } from '@/lib/store'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
 export async function GET() {
-  const { csv } = exportBookingsCsv()
+  const csv = await exportBookingsCsvFromSheet()
   return new NextResponse(csv, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',

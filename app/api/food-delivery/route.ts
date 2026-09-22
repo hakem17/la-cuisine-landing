@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Please choose a delivery time.' }, { status: 400 })
     }
 
-    const request_row = createFoodDeliveryRequest({
+    const request_row = await createFoodDeliveryRequest({
       delivery_date: data.delivery_date,
       delivery_time: data.delivery_time,
     })

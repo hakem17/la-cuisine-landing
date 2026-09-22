@@ -65,24 +65,47 @@ async function ensureSheet(sheets: ReturnType<typeof getClient>, key: SheetKey) 
   }
 }
 
-export async function appendRowToSheet(key: SheetKey, row: Record<string, unknown>) {
-  if (!isConfigured()) return
-  try {
-    const sheets = getClient()
-    await ensureSheet(sheets, key)
-    const { title, header } = SHEETS[key]
-    const values = header.map((h) => {
-      const value = row[h]
-      return value == null ? '' : String(value)
-    })
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID!,
-      range: `${title}!A1`,
-      valueInputOption: 'RAW',
-      insertDataOption: 'INSERT_ROWS',
-      requestBody: { values: [values] },
-    })
-  } catch (err) {
-    console.error(`Failed to sync ${key} row to Google Sheets:`, err)
+export function isSheetsConfigured() {
+  return isConfigured()
+}
+
+export async function getSheetRows(key: SheetKey): Promise<Record<string, string>[]> {
+  if (!isConfigured()) {
+    throw new Error('Google Sheets is not configured (missing GOOGLE_SHEETS_* env vars)')
   }
+  const sheets = getClient()
+  await ensureSheet(sheets, key)
+  const { title, header } = SHEETS[key]
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID!,
+    range: `${title}!A2:${String.fromCharCode(64 + header.length)}`,
+  })
+  const rows = res.data.values ?? []
+  return rows.map((r) => {
+    const obj: Record<string, string> = {}
+    header.forEach((h, i) => {
+      obj[h] = r[i] ?? ''
+    })
+    return obj
+  })
+}
+
+export async function appendRowToSheet(key: SheetKey, row: Record<string, unknown>) {
+  if (!isConfigured()) {
+    throw new Error('Google Sheets is not configured (missing GOOGLE_SHEETS_* env vars)')
+  }
+  const sheets = getClient()
+  await ensureSheet(sheets, key)
+  const { title, header } = SHEETS[key]
+  const values = header.map((h) => {
+    const value = row[h]
+    return value == null ? '' : String(value)
+  })
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SPREADSHEET_ID!,
+    range: `${title}!A1`,
+    valueInputOption: 'RAW',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [values] },
+  })
 }
