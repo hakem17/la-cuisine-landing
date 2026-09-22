@@ -26,7 +26,8 @@ export async function POST(request: Request) {
       email: String(data.email).trim(),
     })
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
+    console.error('POST /api/contact failed:', error)
     return NextResponse.json({ success: false, error: 'Could not send your message.' }, { status: 500 })
   }
 }

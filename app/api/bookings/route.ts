@@ -84,6 +84,7 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === 'DATE_UNAVAILABLE') {
       return NextResponse.json({ success: false, error: 'That date is already booked.' }, { status: 409 })
     }
+    console.error('POST /api/bookings failed:', error)
     return NextResponse.json({ success: false, error: 'Could not save your booking.' }, { status: 500 })
   }
 }

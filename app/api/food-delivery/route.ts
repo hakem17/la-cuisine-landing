@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ success: true, request_id: request_row.request_id })
-  } catch {
+  } catch (error) {
+    console.error('POST /api/food-delivery failed:', error)
     return NextResponse.json({ success: false, error: 'Could not save your delivery request.' }, { status: 500 })
   }
 }
