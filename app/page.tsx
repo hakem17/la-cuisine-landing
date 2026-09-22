@@ -416,7 +416,7 @@ export default function Home() {
 
           <div className="hero-visual">
             <Image
-              src="/images/hero.avif"
+              src="/images/cover.jpg"
               alt="Signature seasonal dining spread"
               fill
               priority
@@ -497,7 +497,7 @@ export default function Home() {
             <article className="service-card service-card--corporate reveal">
               <div className="service-card__media">
                 <Image
-                  src="/images/event-1.jpg"
+                  src="/images/event-2.jpg"
                   alt="Corporate catering — executive breakfast, canapés & buffets"
                   fill
                   className="service-placeholder"
@@ -534,7 +534,7 @@ export default function Home() {
             <article className="service-card service-card--private reveal">
               <div className="service-card__media">
                 <Image
-                  src="/images/event-2.jpg"
+                  src="/images/event-1.jpg"
                   alt="Private & special events — plated dinners, weddings & celebrations"
                   fill
                   className="service-placeholder"
@@ -1008,7 +1008,10 @@ export default function Home() {
             <Link className="book-button sticky-btn" href="/book">
               Book now <ArrowRight size={14} />
             </Link>
-            <Link className="outline-button sticky-btn--subtle" href="/contact-us">
+            <Link
+              className="outline-button sticky-btn--subtle"
+              href="/contact-us"
+            >
               <MessageCircle size={14} /> Inquire
             </Link>
           </div>

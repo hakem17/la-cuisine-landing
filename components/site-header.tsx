@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowRight, Menu, X } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -98,7 +99,7 @@ export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }
         role="banner"
       >
         <Link href="/" className="wordmark" aria-label="La Cuisine de Manou — Home">
-          LA CUISINE <span>DE MANOU</span>
+          <Image src="/images/logo.avif" alt="La Cuisine de Manou" width={160} height={48} priority />
         </Link>
 
         <nav className="desktop-nav" aria-label="Main navigation">
