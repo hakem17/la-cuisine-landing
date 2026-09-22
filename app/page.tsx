@@ -16,7 +16,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const circularFoodImages = [
-  { label: "Artisanal Amuse-Bouche", src: "/images/plates-1.jpg" },
   { label: "French Starter Plating", src: "/images/plates-2.jpg" },
   { label: "Herb-Crusted Lamb / Beef", src: "/images/plates-3.jpg" },
   { label: "Affiné Cheese Selection", src: "/images/plates-4.jpg" },
@@ -123,7 +122,7 @@ const usps = [
     num: "01",
     title: "Personalized touch",
     desc: "Our menus are tailored to your taste, event, and needs. Choose from our culinary offerings and customize your selections and quantities to create a celebration that feels uniquely yours.",
-    image: "/images/why-choose-us.jpg",
+    image: "/images/why-choose-us-main.jpg",
     imageLabel: "Chef selecting seasonal ingredients",
   },
   {
