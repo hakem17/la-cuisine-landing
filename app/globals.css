@@ -2548,6 +2548,12 @@ h3 em {
     max-width: 330px;
   }
 
+  .testimonials-controls {
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
   .booking-banner,
   .contact-banner {
     padding: 5rem 1.25rem;
