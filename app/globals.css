@@ -2220,6 +2220,50 @@ h3 em {
   gap: 1rem;
 }
 
+.contact-details {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  color: #615a50;
+  font-size: 15px;
+}
+
+.contact-details__lead {
+  margin: 0 0 1rem;
+}
+
+.contact-details h2 {
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin: 0 0 1.25rem;
+}
+
+.contact-details dl {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+}
+
+.contact-details dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: #d8896a;
+  margin-bottom: 0.35rem;
+}
+
+.contact-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.contact-details a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ==================================================
    ADMIN & DATA STUDIO STYLES
    ================================================== */

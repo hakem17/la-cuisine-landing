@@ -1,9 +1,10 @@
 "use client";
 
+import { CONTACT } from "@/lib/contact-info";
 import { useBusinessHours } from "@/lib/use-business-hours";
 import { Phone } from "lucide-react";
 
-const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || "+971500000000";
+const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || CONTACT.landline.tel;
 
 // PRD Section 5: the Phone Call option is only ever shown during business
 // hours (Mon–Fri, 9AM–5PM Gulf Standard Time). Outside those hours it

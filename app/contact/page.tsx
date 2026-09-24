@@ -1,3 +1,4 @@
+import { ContactDetails } from '@/components/contact-details'
 import { ContactForm } from '@/components/contact-form'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
@@ -28,6 +29,7 @@ export default function ContactPage() {
       </section>
       <section className="inner-body inner-body--narrow">
         <ContactForm />
+        <ContactDetails />
       </section>
       <SiteFooter />
     </main>

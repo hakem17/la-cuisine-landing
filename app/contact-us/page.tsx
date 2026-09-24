@@ -1,3 +1,4 @@
+import { ContactDetails } from '@/components/contact-details'
 import { ContactForm } from '@/components/contact-form'
 import { PhoneCallButton } from '@/components/phone-call-button'
 import { SiteFooter } from '@/components/site-footer'
@@ -69,6 +70,7 @@ export default async function ContactUsPage({
       </section>
       <section className="inner-body inner-body--narrow">
         <ContactForm initialQuestion={initialQuestion} />
+        <ContactDetails />
       </section>
       <SiteFooter />
     </main>

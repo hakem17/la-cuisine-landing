@@ -2,6 +2,7 @@
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { CONTACT } from "@/lib/contact-info";
 import {
   ArrowRight,
   ChevronLeft,
@@ -981,11 +982,15 @@ export default function Home() {
             </div>
             <div className="contact-banner__note">
               <span>Direct inquiries: </span>
-              <a href="mailto:bonjour@lacuisinedemanou.fr">
-                bonjour@lacuisinedemanou.fr
-              </a>
+              <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
               <span> · </span>
-              <a href="tel:+971500000000">+971 50 000 0000</a>
+              <a href={`tel:${CONTACT.landline.tel}`}>
+                {CONTACT.landline.display}
+              </a>
+              <span> | </span>
+              <a href={`tel:${CONTACT.mobile.tel}`}>
+                {CONTACT.mobile.display}
+              </a>
             </div>
           </div>
         </section>

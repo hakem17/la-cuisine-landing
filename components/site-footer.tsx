@@ -1,3 +1,4 @@
+import { CONTACT } from '@/lib/contact-info'
 import Link from 'next/link'
 
 export function SiteFooter() {
@@ -30,9 +31,14 @@ export function SiteFooter() {
         <div className="footer-info">
           <h4>Inquiries &amp; Service</h4>
           <span>Abu Dhabi · Dubai · UAE</span>
-          <a href="mailto:bonjour@lacuisinedemanou.fr">bonjour@lacuisinedemanou.fr</a>
-          <a href="tel:+971500000000">+971 50 000 0000</a>
-          <p className="footer-hours">Daily: 9:00 AM – 9:00 PM</p>
+          <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+          <a href={`tel:${CONTACT.landline.tel}`}>{CONTACT.landline.display}</a>
+          <a href={`tel:${CONTACT.mobile.tel}`}>{CONTACT.mobile.display}</a>
+          <p className="footer-hours">
+            Office hours: {CONTACT.officeHours}
+            <br />
+            Operational hours: {CONTACT.operationalHours}
+          </p>
         </div>
 
         <div className="footer-actions">

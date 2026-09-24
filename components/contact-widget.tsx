@@ -1,10 +1,11 @@
 "use client";
 
+import { CONTACT } from "@/lib/contact-info";
 import { useBusinessHours } from "@/lib/use-business-hours";
 import { whatsappLink } from "@/lib/whatsapp";
 import { MessageCircle, Phone } from "lucide-react";
 
-const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || "+971500000000";
+const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || CONTACT.landline.tel;
 
 export function ContactWidget() {
   const canCall = useBusinessHours();
