@@ -2,7 +2,7 @@ import { CONTACT } from '@/lib/contact-info'
 
 export function ContactDetails() {
   return (
-    <aside className="contact-details" aria-label="Contact details">
+    <aside className="contact-details" aria-label="Contact details" data-contact-location="contact_page">
       <p className="contact-details__lead">{CONTACT.tagline}</p>
       <h2>{CONTACT.name}</h2>
       <dl>

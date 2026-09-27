@@ -131,7 +131,7 @@ export default async function Home() {
               intimate gatherings to grand celebrations across Dubai, Abu Dhabi,
               and the wider UAE.
             </p>
-            <div className="hero-actions">
+            <div className="hero-actions" data-cta-location="hero">
               <Link className="book-button book-button--light" href="/book">
                 Book now
                 <ArrowRight size={16} />
@@ -210,7 +210,7 @@ export default async function Home() {
               presentation, and gracious hospitality for an event your guests
               will cherish.
             </p>
-            <div className="section-intro__cta">
+            <div className="section-intro__cta" data-cta-location="services_intro">
               <Link className="text-link" href="/book">
                 Enquire now <ArrowRight size={15} />
               </Link>
@@ -219,7 +219,10 @@ export default async function Home() {
 
           <div className="service-grid">
             {/* Corporate Card */}
-            <article className="service-card service-card--corporate reveal">
+            <article
+              className="service-card service-card--corporate reveal"
+              data-cta-location="service_card_corporate"
+            >
               <div className="service-card__media">
                 <Image
                   src="/images/event-2.jpg"
@@ -256,7 +259,10 @@ export default async function Home() {
             </article>
 
             {/* Private Occasions Card */}
-            <article className="service-card service-card--private reveal">
+            <article
+              className="service-card service-card--private reveal"
+              data-cta-location="service_card_private"
+            >
               <div className="service-card__media">
                 <Image
                   src="/images/event-1.jpg"
@@ -354,7 +360,7 @@ export default async function Home() {
               ))}
             </div>
 
-            <div className="usp-action">
+            <div className="usp-action" data-cta-location="why_us">
               <Link className="book-button" href="/book">
                 Plan Your Event <ArrowRight size={16} />
               </Link>
@@ -427,7 +433,7 @@ export default async function Home() {
               create a tailored catering experience to make your occasion
               unforgettable.
             </p>
-            <div className="booking-banner__actions">
+            <div className="booking-banner__actions" data-cta-location="bottom_cta">
               <Link className="book-button book-button--light" href="/book">
                 Plan your event <ArrowRight size={16} />
               </Link>
@@ -449,7 +455,7 @@ export default async function Home() {
           className="section-pad faq-section"
           aria-label="Frequently Asked Questions"
         >
-          <div className="faq-intro">
+          <div className="faq-intro" data-cta-location="faq">
             <p className="eyebrow">Frequently Asked Questions</p>
             <h2>
               Everything You
@@ -480,7 +486,7 @@ export default async function Home() {
               life with an exquisite catering experience starting from the menu
               to the final detail.
             </p>
-            <div className="contact-banner__actions">
+            <div className="contact-banner__actions" data-cta-location="final_cta">
               <Link className="book-button book-button--light" href="/book">
                 Book now <ArrowRight size={16} />
               </Link>
@@ -491,7 +497,10 @@ export default async function Home() {
                 Contact us
               </Link>
             </div>
-            <div className="contact-banner__note">
+            <div
+              className="contact-banner__note"
+              data-contact-location="final_cta_section"
+            >
               <span>Direct inquiries: </span>
               <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
               <span> · </span>
@@ -514,7 +523,7 @@ export default async function Home() {
             <strong>La Cuisine de Manou</strong>
             <span>Seasonal French Catering · UAE</span>
           </div>
-          <div className="sticky-cta-bar__buttons">
+          <div className="sticky-cta-bar__buttons" data-cta-location="sticky_bar">
             <Link className="book-button sticky-btn" href="/book">
               Book now <ArrowRight size={14} />
             </Link>

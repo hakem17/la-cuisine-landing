@@ -1,3 +1,4 @@
+import { AnalyticsListener } from "@/components/analytics-listener";
 import { ContactWidget } from "@/components/contact-widget";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
@@ -58,6 +59,7 @@ export default function RootLayout({
         <>
           {children}
           <ContactWidget />
+          <AnalyticsListener />
           {process.env.NODE_ENV === "production" && <Analytics />}
         </>
 

@@ -1,8 +1,9 @@
 'use client'
 
+import { pushEvent, trackContactFormSubmit } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
 import { ArrowRight } from 'lucide-react'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useRef, useState } from 'react'
 
 const COUNTRIES = [
   { code: '+971', label: 'UAE' },
@@ -24,20 +25,32 @@ export function ContactForm({ initialQuestion = '' }: { initialQuestion?: string
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
+  const startedRef = useRef(false)
+
+  const onFirstInteraction = () => {
+    if (startedRef.current) return
+    startedRef.current = true
+    pushEvent('form_start', { form_name: 'contact_us' })
+  }
+
+  const fail = (message: string) => {
+    pushEvent('form_error', { form_name: 'contact_us', error_message: message })
+    setError(message)
+  }
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (question.trim().length < 10) {
-      return setError('Please tell us a little more — at least 10 characters.')
+      return fail('Please tell us a little more — at least 10 characters.')
     }
     if (fullName.trim().length < 2) {
-      return setError('Please enter your full name.')
+      return fail('Please enter your full name.')
     }
     if (!/^[0-9\s]{6,}$/.test(phone.trim())) {
-      return setError('Please enter a valid phone number.')
+      return fail('Please enter a valid phone number.')
     }
     if (!email.includes('@') || !email.includes('.')) {
-      return setError('Please enter a valid email address.')
+      return fail('Please enter a valid email address.')
     }
     setSubmitting(true)
     setError('')
@@ -55,9 +68,10 @@ export function ContactForm({ initialQuestion = '' }: { initialQuestion?: string
       })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.error || 'Could not send your message')
+      trackContactFormSubmit()
       setDone(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      fail(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       setSubmitting(false)
     }
@@ -65,7 +79,7 @@ export function ContactForm({ initialQuestion = '' }: { initialQuestion?: string
 
   if (done) {
     return (
-      <div className="success-panel">
+      <div className="success-panel" data-contact-location="contact_form_success">
         <p className="eyebrow">Message received</p>
         <h2>
           We’ll be
@@ -86,7 +100,7 @@ export function ContactForm({ initialQuestion = '' }: { initialQuestion?: string
   }
 
   return (
-    <form className="contact-form" onSubmit={onSubmit}>
+    <form className="contact-form" onSubmit={onSubmit} onFocus={onFirstInteraction}>
       <label className="field">
         <span>Your question or brief</span>
         <textarea

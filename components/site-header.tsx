@@ -97,6 +97,7 @@ export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }
       <header
         className={`site-header ${scrolled || variant === 'inner' ? 'site-header--scrolled' : ''}`}
         role="banner"
+        data-cta-location="header_nav"
       >
         <Link href="/" className="wordmark" aria-label="La Cuisine de Manou — Home">
           <Image src="/images/logo.avif" alt="La Cuisine de Manou" width={160} height={48} loading="eager" />
@@ -142,6 +143,7 @@ export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
+          data-cta-location="header_nav"
         >
           <div className="mobile-menu__inner">
             <div className="mobile-menu__header">

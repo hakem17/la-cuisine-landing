@@ -28,7 +28,7 @@ export function SiteFooter() {
           </ul>
         </div>
 
-        <div className="footer-info">
+        <div className="footer-info" data-contact-location="footer">
           <h3>Inquiries &amp; Service</h3>
           <span>Abu Dhabi · Dubai · UAE</span>
           <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
@@ -41,7 +41,7 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <div className="footer-actions">
+        <div className="footer-actions" data-cta-location="footer_secondary">
           <h3>Ready to Plan?</h3>
           <Link className="book-button" href="/book">
             Start your order ↗

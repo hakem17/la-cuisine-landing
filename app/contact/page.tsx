@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <main className="inner-page">
       <SiteHeader />
-      <section className="inner-hero">
+      <section className="inner-hero" data-cta-location="contact_page">
         <p className="eyebrow">A conversation</p>
         <h1>
           Ask us

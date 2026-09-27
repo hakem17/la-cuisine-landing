@@ -1,6 +1,13 @@
 "use client";
 
 import { PhoneCallButton } from "@/components/phone-call-button";
+import {
+  getBookingId,
+  pushEvent,
+  trackBookingSubmit,
+  type BookingStepName,
+  type BookingStepValue,
+} from "@/lib/analytics";
 import { calculateBudget, formatBudgetRange } from "@/lib/budget";
 import { whatsappLink } from "@/lib/whatsapp";
 import {
@@ -20,7 +27,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 const STEPS = [
   "Event type",
@@ -30,6 +37,24 @@ const STEPS = [
   "Your info",
   "Review",
 ];
+
+// Data layer: the spec's step_number/step_name per question, grouped by the
+// UI step that asks them. The review step (6) is completed by the submit.
+const TRACKED_STEPS: Record<number, { number: number; name: BookingStepName }[]> = {
+  1: [{ number: 1, name: "event_type" }],
+  2: [{ number: 2, name: "event_format" }],
+  3: [
+    { number: 3, name: "event_date" },
+    { number: 4, name: "guest_count" },
+    { number: 5, name: "location" },
+  ],
+  4: [
+    { number: 6, name: "budget_range" },
+    { number: 7, name: "cuisine_interests" },
+    { number: 8, name: "preferred_contact_channel" },
+  ],
+  5: [{ number: 9, name: "contact_details" }],
+};
 
 // Q2 options — must match the PRD's price table keys exactly (lib/budget.ts)
 // so the budget calculator can look up avgPricePerGuest for each selection.
@@ -160,6 +185,13 @@ function BookingWizardContent() {
   const initialEvent = searchParams.get("event");
 
   const [step, setStep] = useState(1);
+
+  // Tracking-only flow id (sessionStorage); distinct from the server's booking ID.
+  const trackingIdRef = useRef("");
+  const trackingId = () => (trackingIdRef.current ||= getBookingId());
+  const formStartedRef = useRef(false);
+  const lastStepCompletedRef = useRef(0);
+  const flowEndedRef = useRef(false);
   const [form, setForm] = useState<FormState>(() => {
     const isPrivate = initialType === "private";
     const isCorporate = initialType === "corporate";
@@ -183,6 +215,18 @@ function BookingWizardContent() {
         ...prev,
         event_type: initialType,
       }));
+      // Event type was picked on the home page service card, so step 1 is done.
+      pushEvent("booking_step_complete", {
+        booking_id: trackingId(),
+        step_number: 1,
+        step_name: "event_type",
+        step_value: initialType,
+      });
+      lastStepCompletedRef.current = Math.max(lastStepCompletedRef.current, 1);
+      if (!formStartedRef.current) {
+        formStartedRef.current = true;
+        pushEvent("form_start", { form_name: "booking_wizard" });
+      }
       setStep(2);
     }
   }, [initialType]);
@@ -241,6 +285,95 @@ function BookingWizardContent() {
   }, [form.guest_count, form.event_type, isVip]);
 
   const today = new Date().toISOString().slice(0, 10);
+
+  // ---- Data layer tracking ----
+  const stepValue = (name: BookingStepName): BookingStepValue => {
+    switch (name) {
+      case "event_type":
+        return form.event_type;
+      case "event_format":
+        return {
+          format: form.event_selection,
+          additional_services: form.additional_services,
+        };
+      case "event_date":
+        return form.event_date;
+      case "guest_count":
+        return form.guest_count;
+      case "location":
+        return form.location === "Other"
+          ? form.location_other.trim()
+          : form.location;
+      case "budget_range":
+        return budgetRange
+          ? formatBudgetRange(budgetRange.min, budgetRange.max)
+          : null;
+      case "cuisine_interests":
+        return form.cuisine;
+      case "preferred_contact_channel":
+        return form.contact_channel;
+      case "contact_details":
+        return null; // never push PII
+    }
+  };
+
+  const trackStepComplete = (uiStep: number) => {
+    for (const { number, name } of TRACKED_STEPS[uiStep] ?? []) {
+      pushEvent("booking_step_complete", {
+        booking_id: trackingId(),
+        step_number: number,
+        step_name: name,
+        step_value: stepValue(name),
+      });
+      lastStepCompletedRef.current = Math.max(
+        lastStepCompletedRef.current,
+        number,
+      );
+    }
+    if (uiStep === 1 && !formStartedRef.current) {
+      formStartedRef.current = true;
+      pushEvent("form_start", { form_name: "booking_wizard" });
+    }
+  };
+
+  const trackError = (uiStep: number, message: string) => {
+    pushEvent("form_error", {
+      form_name: "booking_wizard",
+      step_number: TRACKED_STEPS[uiStep]?.[0].number ?? 9,
+      error_message: message,
+    });
+  };
+
+  useEffect(() => {
+    if (step === 2 && form.event_type === "food_delivery") return;
+    for (const { number, name } of TRACKED_STEPS[step] ?? []) {
+      pushEvent("booking_step_view", {
+        booking_id: trackingId(),
+        step_number: number,
+        step_name: name,
+        step_value: null,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  // Abandonment: leaving /book (unmount) or the page (pagehide) after starting.
+  useEffect(() => {
+    const abandon = () => {
+      if (!formStartedRef.current || flowEndedRef.current) return;
+      flowEndedRef.current = true;
+      pushEvent("booking_step_abandon", {
+        booking_id: trackingId(),
+        last_step_completed: lastStepCompletedRef.current,
+      });
+    };
+    window.addEventListener("pagehide", abandon);
+    return () => {
+      window.removeEventListener("pagehide", abandon);
+      abandon();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -338,6 +471,7 @@ function BookingWizardContent() {
   const next = async () => {
     const message = validateStep(step);
     if (message) {
+      trackError(step, message);
       setError(message);
       return;
     }
@@ -361,13 +495,16 @@ function BookingWizardContent() {
         }
       } catch (err) {
         setSubmittingDelivery(false);
-        setError(
+        const message =
           err instanceof Error
             ? err.message
-            : "Something went wrong. Please try again.",
-        );
+            : "Something went wrong. Please try again.";
+        trackError(step, message);
+        setError(message);
         return;
       }
+      // Delivery requests hand off to /contact-us, so this isn't an abandon.
+      flowEndedRef.current = true;
       const params = new URLSearchParams({
         flow: "food-delivery",
         date: form.delivery_date,
@@ -376,6 +513,7 @@ function BookingWizardContent() {
       router.push(`/contact-us?${params.toString()}`);
       return;
     }
+    trackStepComplete(step);
     setStep((s) => Math.min(6, s + 1));
   };
 
@@ -402,6 +540,7 @@ function BookingWizardContent() {
     event.preventDefault();
     const message = validateStep(5);
     if (message) {
+      trackError(5, message);
       setError(message);
       setStep(5);
       return;
@@ -449,13 +588,27 @@ function BookingWizardContent() {
       const data = await res.json();
       if (!res.ok || !data.success)
         throw new Error(data.error || "Could not submit booking");
+      flowEndedRef.current = true;
+      trackBookingSubmit({
+        booking_id: trackingId(),
+        event_type: form.event_type,
+        event_format: form.event_selection,
+        additional_services: form.additional_services,
+        event_date: form.event_date,
+        guest_count: form.guest_count,
+        location: stepValue("location") as string,
+        budget_range: stepValue("budget_range") as string | null,
+        cuisine_interests: form.cuisine,
+        preferred_contact_channel: form.contact_channel,
+      });
       setBookingId(data.booking_id);
     } catch (err) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again.",
-      );
+          : "Something went wrong. Please try again.";
+      trackError(5, message);
+      setError(message);
     } finally {
       setSubmitting(false);
     }
@@ -484,7 +637,7 @@ function BookingWizardContent() {
           availability.
         </p>
         <div className="booking-id">Booking ID · {bookingId}</div>
-        <div className="contact-actions">
+        <div className="contact-actions" data-contact-location="booking_success">
           <a className="book-button" href={wa} target="_blank" rel="noreferrer">
             Chat with us on WhatsApp <ArrowRight size={16} />
           </a>

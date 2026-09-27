@@ -7,7 +7,7 @@ const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || CONTACT.landline.te
 
 export function ContactWidget() {
   return (
-    <div className="contact-widget" role="complementary" aria-label="Quick contact">
+    <div className="contact-widget" role="complementary" aria-label="Quick contact" data-contact-location="floating_button">
       <BusinessHoursGate>
         <a
           className="contact-widget__button contact-widget__button--phone"
