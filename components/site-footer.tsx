@@ -18,7 +18,7 @@ export function SiteFooter() {
         </div>
 
         <div className="footer-links">
-          <h4>Navigation</h4>
+          <h3>Navigation</h3>
           <ul>
             <li><a href="#services">Services</a></li>
             <li><a href="#usps">Why Us</a></li>
@@ -29,7 +29,7 @@ export function SiteFooter() {
         </div>
 
         <div className="footer-info">
-          <h4>Inquiries &amp; Service</h4>
+          <h3>Inquiries &amp; Service</h3>
           <span>Abu Dhabi · Dubai · UAE</span>
           <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
           <a href={`tel:${CONTACT.landline.tel}`}>{CONTACT.landline.display}</a>
@@ -42,7 +42,7 @@ export function SiteFooter() {
         </div>
 
         <div className="footer-actions">
-          <h4>Ready to Plan?</h4>
+          <h3>Ready to Plan?</h3>
           <Link className="book-button" href="/book">
             Start your order ↗
           </Link>

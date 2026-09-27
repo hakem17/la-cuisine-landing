@@ -1,7 +1,5 @@
-"use client";
-
+import { BusinessHoursGate } from "@/components/business-hours-gate";
 import { CONTACT } from "@/lib/contact-info";
-import { useBusinessHours } from "@/lib/use-business-hours";
 import { Phone } from "lucide-react";
 
 const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER || CONTACT.landline.tel;
@@ -14,11 +12,11 @@ export function PhoneCallButton({
 }: {
   className?: string;
 }) {
-  const canCall = useBusinessHours();
-  if (!canCall) return null;
   return (
-    <a className={className} href={`tel:${PHONE_NUMBER}`}>
-      <Phone size={16} /> Call us now
-    </a>
+    <BusinessHoursGate>
+      <a className={className} href={`tel:${PHONE_NUMBER}`}>
+        <Phone size={16} /> Call us now
+      </a>
+    </BusinessHoursGate>
   );
 }

@@ -99,7 +99,7 @@ export function SiteHeader({ variant = 'inner' }: { variant?: 'home' | 'inner' }
         role="banner"
       >
         <Link href="/" className="wordmark" aria-label="La Cuisine de Manou — Home">
-          <Image src="/images/logo.avif" alt="La Cuisine de Manou" width={160} height={48} priority />
+          <Image src="/images/logo.avif" alt="La Cuisine de Manou" width={160} height={48} loading="eager" />
         </Link>
 
         <nav className="desktop-nav" aria-label="Main navigation">

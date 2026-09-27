@@ -4,7 +4,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    // AVIF first (smallest), WebP fallback; originals only for old browsers
+    formats: ['image/avif', 'image/webp'],
+    qualities: [75],
+    minimumCacheTTL: 2678400, // 31 days — /public images rarely change
   },
 }
 

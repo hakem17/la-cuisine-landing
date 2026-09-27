@@ -14,7 +14,8 @@ const dmSans = DM_Sans({
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  // serif is only ever used for italic accents (em, quotes)
+  style: ["italic"],
   variable: "--font-playfair",
 });
 
@@ -38,7 +39,10 @@ export default function RootLayout({
       lang="en"
       className={`bg-background ${dmSans.variable} ${playfair.variable}`}
     >
-      <body className={`${dmSans.className} antialiased`}>
+      {/* Browser extensions (e.g. ColorZilla's cz-shortcut-listen) inject
+          attributes on <body> before hydration; this only silences that one
+          element's attribute diff, not mismatches in its children. */}
+      <body className={`${dmSans.className} antialiased`} suppressHydrationWarning>
         {/* Google Tag Manager (noscript) */}
         {/* This is the noscript version of the Google Tag Manager. It will be used if JavaScript is disabled. */}
         <noscript>
@@ -58,8 +62,8 @@ export default function RootLayout({
         </>
 
         {/* Google Tag Manager */}
-        {/* This is the main Google Tag Manager script. It will be executed after the page loads. */}
-        <Script id="gtm" strategy="afterInteractive">
+        {/* Loaded once the browser is idle so it doesn't compete with the hero for bandwidth/CPU. */}
+        <Script id="gtm" strategy="lazyOnload">
           {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
           j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

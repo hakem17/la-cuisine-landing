@@ -1,20 +1,20 @@
-"use client";
-
+import { FaqAccordion, type Faq } from "@/components/home/faq-accordion";
+import { GalleryScroller } from "@/components/home/gallery-scroller";
+import { HashScroll } from "@/components/home/hash-scroll";
+import { StickyCtaBar } from "@/components/home/sticky-cta-bar";
+import { TestimonialsCarousel } from "@/components/home/testimonials-carousel";
+import { UspScrollSync } from "@/components/home/usp-scroll-sync";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CONTACT } from "@/lib/contact-info";
-import {
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  MessageCircle,
-  Minus,
-  Plus,
-  X,
-} from "lucide-react";
+import { getTestimonials } from "@/lib/testimonials";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+
+// Statically rendered; Google reviews are re-read at most once an hour
+// (the underlying Serper feed is itself cached for 5 days).
+export const revalidate = 3600;
 
 const circularFoodImages = [
   { label: "French Starter Plating", src: "/images/plates-2.jpg" },
@@ -35,67 +35,7 @@ const galleryCards = [
   { label: "Corporate VIP Banquet", src: "/images/gallery-7.jpg" },
 ];
 
-type Testimonial = {
-  id: number | string;
-  quote: string;
-  name: string;
-  event: string;
-  rating: number;
-  link?: string;
-};
-
-const fallbackTestimonials: Testimonial[] = [
-  {
-    id: 1,
-    quote:
-      "Every detail felt effortless, from the first conversation to the last plate. The food was extraordinary and our guests are still talking about the evening. Chef Manou and the team crafted a seasonal five-course menu that perfectly captured authentic Parisian gastronomy with stunning presentation.",
-    name: "Camille & Thomas",
-    event: "Private Dinner · Abu Dhabi",
-    rating: 5,
-  },
-  {
-    id: 2,
-    quote:
-      "Manou understood our brand brief immediately and delivered an executive reception that was both elevated and deeply hospitable. Pure Parisian finesse. The passed canapés and artisanal patisserie were exceptional.",
-    name: "Sophie Laurent",
-    event: "Luxury Brand Launch · DIFC, Dubai",
-    rating: 5,
-  },
-  {
-    id: 3,
-    quote:
-      "A rare combination of calm, precision, and genuine warmth. The table looked breathtaking, and every course arrived at the perfect cadence. Truly made our milestone anniversary unforgettable.",
-    name: "The Martin Family",
-    event: "Anniversary Celebration · Saadiyat Island",
-    rating: 5,
-  },
-  {
-    id: 4,
-    quote:
-      "Flawless execution for our 80-guest reception. The live stations were a major highlight, and the seamless front-of-house service gave us total peace of mind throughout the entire night.",
-    name: "Alexandre & Nour",
-    event: "Wedding Reception · Dubai",
-    rating: 5,
-  },
-  {
-    id: 5,
-    quote:
-      "Discreet, highly sophisticated, and punctual. The seasonal French dishes were plated with Michelin-level finesse. Our international board members were thoroughly impressed.",
-    name: "David K.",
-    event: "Executive Board Dinner · ADGM, Abu Dhabi",
-    rating: 5,
-  },
-  {
-    id: 6,
-    quote:
-      "From the bespoke canapé selection to the signature dessert tower, everything exceeded our high expectations. The team handled every dietary request with grace and creativity.",
-    name: "Elena Rostova",
-    event: "VIP Birthday Soirée · Palm Jumeirah",
-    rating: 5,
-  },
-];
-
-const faqs = [
+const faqs: Faq[] = [
   {
     q: "What areas across the UAE do you serve?",
     a: "We provide full-service catering and private chef experiences across Abu Dhabi, Dubai, and the wider Emirates.",
@@ -149,227 +89,12 @@ const usps = [
   },
 ];
 
-export default function Home() {
-  const [activeFaq, setActiveFaq] = useState<number | null>(0);
-  const [showStickyCta, setShowStickyCta] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  // Scroll-linked parallax state for Section 5 Why Us USPs
-  const [activeUsp, setActiveUsp] = useState(0);
-  const uspItemRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // Drag-to-scroll state for Section 6 gallery
-  const galleryRef = useRef<HTMLDivElement>(null);
-  const isGalleryDragging = useRef(false);
-  const galleryStartX = useRef(0);
-  const galleryScrollLeftStart = useRef(0);
-
-  // Carousel state for Section 7 Testimonials
-  const testimonialCarouselRef = useRef<HTMLDivElement>(null);
-  const [activeTestimonialPage, setActiveTestimonialPage] = useState(0);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [selectedReviewModal, setSelectedReviewModal] =
-    useState<Testimonial | null>(null);
-  const [testimonials, setTestimonials] =
-    useState<Testimonial[]>(fallbackTestimonials);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/reviews")
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled || !data.success || !Array.isArray(data.reviews)) return;
-        const usable = data.reviews.filter(
-          (review: { snippet?: string; translatedSnippet?: string }) =>
-            review.snippet || review.translatedSnippet,
-        );
-        if (usable.length === 0) return;
-        const mapped: Testimonial[] = usable.map(
-          (
-            review: {
-              isoDate: string;
-              snippet?: string;
-              translatedSnippet?: string;
-              user: { name: string; link?: string };
-              date: string;
-              rating: number;
-              link?: string;
-            },
-            index: number,
-          ) => ({
-            id: review.isoDate || index,
-            quote: review.translatedSnippet ?? review.snippet ?? "",
-            name: review.user?.name ?? "Google User",
-            event: `Google Review · ${review.date}`,
-            rating: review.rating,
-            link: review.link ?? review.user?.link,
-          }),
-        );
-        setTestimonials(mapped);
-      })
-      .catch(() => {
-        // Keep the fallback testimonials on any fetch/parse failure.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleGalleryScroll = () => {
-    if (!galleryRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current;
-    const maxScroll = scrollWidth - clientWidth;
-    if (maxScroll > 0) {
-      setScrollProgress(scrollLeft / maxScroll);
-    }
-  };
-
-  const onGalleryMouseDown = (e: React.MouseEvent) => {
-    if (!galleryRef.current) return;
-    isGalleryDragging.current = true;
-    galleryRef.current.classList.add("is-dragging");
-    galleryStartX.current = e.pageX - galleryRef.current.offsetLeft;
-    galleryScrollLeftStart.current = galleryRef.current.scrollLeft;
-  };
-
-  const onGalleryMouseMove = (e: React.MouseEvent) => {
-    if (!isGalleryDragging.current || !galleryRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - galleryRef.current.offsetLeft;
-    const walk = (x - galleryStartX.current) * 1.5;
-    galleryRef.current.scrollLeft = galleryScrollLeftStart.current - walk;
-  };
-
-  const onGalleryMouseUpOrLeave = () => {
-    isGalleryDragging.current = false;
-    galleryRef.current?.classList.remove("is-dragging");
-  };
-
-  // Testimonials Carousel scroll sync
-  const updateTestimonialState = () => {
-    if (!testimonialCarouselRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } =
-      testimonialCarouselRef.current;
-    const maxScroll = scrollWidth - clientWidth;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft < maxScroll - 10);
-
-    // Calculate active page based on card width
-    const cardWidth = testimonialCarouselRef.current.firstElementChild
-      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement)
-          .offsetWidth + 24
-      : 300;
-    const page = Math.round(scrollLeft / cardWidth);
-    setActiveTestimonialPage(
-      Math.min(testimonials.length - 1, Math.max(0, page)),
-    );
-  };
-
-  const scrollTestimonials = (direction: "left" | "right") => {
-    if (!testimonialCarouselRef.current) return;
-    const cardWidth = testimonialCarouselRef.current.firstElementChild
-      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement)
-          .offsetWidth + 24
-      : 320;
-    const delta = direction === "left" ? -cardWidth : cardWidth;
-    testimonialCarouselRef.current.scrollBy({
-      left: delta,
-      behavior: "smooth",
-    });
-  };
-
-  const jumpToTestimonial = (index: number) => {
-    if (!testimonialCarouselRef.current) return;
-    const cardWidth = testimonialCarouselRef.current.firstElementChild
-      ? (testimonialCarouselRef.current.firstElementChild as HTMLElement)
-          .offsetWidth + 24
-      : 320;
-    testimonialCarouselRef.current.scrollTo({
-      left: index * cardWidth,
-      behavior: "smooth",
-    });
-  };
-
-  // Auto-scrolling testimonials slider: advances on a timer, pauses while
-  // the visitor is hovering or has just interacted manually, loops back to
-  // the start once it reaches the end.
-  const isTestimonialHovering = useRef(false);
-  const testimonialLastInteraction = useRef(0);
-  const pauseTestimonialAutoScroll = () => {
-    testimonialLastInteraction.current = Date.now();
-  };
-
-  useEffect(() => {
-    if (testimonials.length <= 1) return;
-    const AUTO_SCROLL_INTERVAL_MS = 1500;
-    const RESUME_AFTER_INTERACTION_MS = 3000;
-
-    const interval = setInterval(() => {
-      if (isTestimonialHovering.current) return;
-      if (
-        Date.now() - testimonialLastInteraction.current <
-        RESUME_AFTER_INTERACTION_MS
-      )
-        return;
-
-      const el = testimonialCarouselRef.current;
-      if (!el) return;
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
-
-      if (el.scrollLeft >= maxScroll - 10) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        scrollTestimonials("right");
-      }
-    }, AUTO_SCROLL_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowStickyCta(window.scrollY > 600);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Parallax scroll sync for Section 5: whichever USP item crosses the
-  // viewport's center band becomes active, driving both the image crossfade
-  // and the text emphasis.
-  useEffect(() => {
-    const items = uspItemRefs.current.filter(
-      (el): el is HTMLDivElement => el !== null,
-    );
-    if (items.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const index = Number((entry.target as HTMLElement).dataset.uspIndex);
-          if (!Number.isNaN(index)) setActiveUsp(index);
-        });
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
-    );
-
-    items.forEach((item) => observer.observe(item));
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (hash) {
-      const el = document.getElementById(hash);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
+export default async function Home() {
+  const testimonials = await getTestimonials();
 
   return (
     <main id="top" className="landing-main">
+      <HashScroll />
       <a href="#content" className="skip-link">
         Skip to content
       </a>
@@ -419,7 +144,7 @@ export default function Home() {
               src="/images/cover.jpg"
               alt="Signature seasonal dining spread"
               fill
-              priority
+              preload
               className="hero-placeholder"
               sizes="(max-width: 768px) 100vw, 66vw"
             />
@@ -583,7 +308,7 @@ export default function Home() {
             {usps.map((item, index) => (
               <div
                 key={item.num}
-                className={`usp-visual__frame ${activeUsp === index ? "is-active" : ""}`}
+                className={`usp-visual__frame ${index === 0 ? "is-active" : ""}`}
               >
                 <Image
                   src={item.image}
@@ -617,11 +342,8 @@ export default function Home() {
               {usps.map((item, index) => (
                 <div
                   key={item.num}
-                  ref={(el) => {
-                    uspItemRefs.current[index] = el;
-                  }}
                   data-usp-index={index}
-                  className={`usp-item ${activeUsp === index ? "is-active" : ""}`}
+                  className={`usp-item ${index === 0 ? "is-active" : ""}`}
                 >
                   <span className="usp-num">{item.num}</span>
                   <div className="usp-text">
@@ -638,6 +360,8 @@ export default function Home() {
               </Link>
             </div>
           </div>
+
+          <UspScrollSync sectionId="usps" />
         </section>
 
         {/* ==================================================
@@ -659,42 +383,19 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="gallery-wrapper">
-            <div
-              ref={galleryRef}
-              className="gallery-row"
-              role="region"
-              aria-label="Scrollable horizontal image gallery"
-              tabIndex={0}
-              onScroll={handleGalleryScroll}
-              onMouseDown={onGalleryMouseDown}
-              onMouseMove={onGalleryMouseMove}
-              onMouseUp={onGalleryMouseUpOrLeave}
-              onMouseLeave={onGalleryMouseUpOrLeave}
-            >
-              {galleryCards.map((card, idx) => (
-                <div key={idx} className="gallery-card">
-                  <Image
-                    src={card.src}
-                    alt={card.label}
-                    fill
-                    className="gallery-card__placeholder"
-                    sizes="320px"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Thin vertical scrollbar indicator on the far right edge */}
-            <div className="gallery-scrollbar-track" aria-hidden="true">
-              <div
-                className="gallery-scrollbar-thumb"
-                style={{
-                  top: `${scrollProgress * 70}%`,
-                }}
-              />
-            </div>
-          </div>
+          <GalleryScroller>
+            {galleryCards.map((card, idx) => (
+              <div key={idx} className="gallery-card">
+                <Image
+                  src={card.src}
+                  alt={card.label}
+                  fill
+                  className="gallery-card__placeholder"
+                  sizes="320px"
+                />
+              </div>
+            ))}
+          </GalleryScroller>
         </section>
 
         {/* ==================================================
@@ -711,166 +412,8 @@ export default function Home() {
             <p className="testimonials-subtitle">Customer Testimonials</p>
           </div>
 
-          {/* Testimonial Cards Carousel Row */}
-          <div
-            ref={testimonialCarouselRef}
-            className="testimonials-carousel"
-            role="region"
-            aria-label="Customer reviews carousel"
-            tabIndex={0}
-            onScroll={updateTestimonialState}
-            onMouseEnter={() => {
-              isTestimonialHovering.current = true;
-            }}
-            onMouseLeave={() => {
-              isTestimonialHovering.current = false;
-            }}
-            onTouchStart={pauseTestimonialAutoScroll}
-          >
-            {testimonials.map((item) => (
-              <article key={item.id} className="testimonial-box">
-                <div className="testimonial-box__top">
-                  <div
-                    className="stars-row"
-                    aria-label={`${item.rating} out of 5 stars`}
-                  >
-                    {"★".repeat(item.rating)}
-                  </div>
-                </div>
-
-                <div className="testimonial-box__body">
-                  <p className="testimonial-box__quote">“{item.quote}”</p>
-                  <button
-                    type="button"
-                    className="testimonial-full-link"
-                    onClick={() => setSelectedReviewModal(item)}
-                  >
-                    Full Review
-                  </button>
-                </div>
-
-                <div className="testimonial-box__name-bar">
-                  {item.link ? (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="testimonial-box__name-link"
-                    >
-                      <strong>{item.name}</strong>
-                    </a>
-                  ) : (
-                    <strong>{item.name}</strong>
-                  )}
-                  <span>{item.event}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {/* Navigation Controls: Dots on Left, Arrow Buttons on Right */}
-          <div className="testimonials-controls">
-            <div
-              className="testimonials-dots"
-              role="tablist"
-              aria-label="Testimonial pages"
-            >
-              {testimonials.map((_, dotIdx) => (
-                <button
-                  key={dotIdx}
-                  type="button"
-                  role="tab"
-                  aria-label={`Go to review ${dotIdx + 1}`}
-                  aria-selected={activeTestimonialPage === dotIdx}
-                  className={`testimonial-dot ${activeTestimonialPage === dotIdx ? "is-active" : ""}`}
-                  onClick={() => {
-                    pauseTestimonialAutoScroll();
-                    jumpToTestimonial(dotIdx);
-                  }}
-                />
-              ))}
-            </div>
-
-            <div
-              className="testimonials-arrows"
-              aria-label="Carousel navigation"
-            >
-              <button
-                type="button"
-                className="carousel-circle-btn"
-                aria-label="Previous testimonials"
-                disabled={!canScrollLeft}
-                onClick={() => {
-                  pauseTestimonialAutoScroll();
-                  scrollTestimonials("left");
-                }}
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                type="button"
-                className="carousel-circle-btn"
-                aria-label="Next testimonials"
-                disabled={!canScrollRight}
-                onClick={() => {
-                  pauseTestimonialAutoScroll();
-                  scrollTestimonials("right");
-                }}
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          </div>
+          <TestimonialsCarousel testimonials={testimonials} />
         </section>
-
-        {/* Full Review Modal */}
-        {selectedReviewModal && (
-          <div
-            className="review-modal-backdrop"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Full review by ${selectedReviewModal.name}`}
-            onClick={() => setSelectedReviewModal(null)}
-          >
-            <div
-              className="review-modal-panel"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                className="review-modal-close"
-                aria-label="Close review modal"
-                onClick={() => setSelectedReviewModal(null)}
-              >
-                <X size={20} />
-              </button>
-              <div
-                className="stars-row"
-                aria-label={`${selectedReviewModal.rating} stars`}
-              >
-                {"★".repeat(selectedReviewModal.rating)}
-              </div>
-              <blockquote className="review-modal-quote">
-                “{selectedReviewModal.quote}”
-              </blockquote>
-              <div className="review-modal-footer">
-                {selectedReviewModal.link ? (
-                  <a
-                    href={selectedReviewModal.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="testimonial-box__name-link"
-                  >
-                    <strong>{selectedReviewModal.name}</strong>
-                  </a>
-                ) : (
-                  <strong>{selectedReviewModal.name}</strong>
-                )}
-                <span>{selectedReviewModal.event}</span>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ==================================================
             SECTION 8: MID-PAGE CONVERSION BANNER
@@ -922,39 +465,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="faq-list" role="region" aria-label="FAQ Accordion">
-            {faqs.map((faq, i) => {
-              const isOpen = activeFaq === i;
-              const faqId = `faq-answer-${i}`;
-              const btnId = `faq-button-${i}`;
-              return (
-                <div className="faq-item" key={faq.q}>
-                  <button
-                    id={btnId}
-                    type="button"
-                    onClick={() => setActiveFaq(isOpen ? null : i)}
-                    aria-expanded={isOpen}
-                    aria-controls={faqId}
-                  >
-                    <span>{faq.q}</span>
-                    <span className="faq-icon" aria-hidden="true">
-                      {isOpen ? <Minus size={18} /> : <Plus size={18} />}
-                    </span>
-                  </button>
-                  {isOpen && (
-                    <div
-                      id={faqId}
-                      role="region"
-                      aria-labelledby={btnId}
-                      className="faq-answer"
-                    >
-                      <p>{faq.a}</p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <FaqAccordion faqs={faqs} />
         </section>
 
         {/* ==================================================
@@ -997,10 +508,7 @@ export default function Home() {
       {/* ==================================================
           STICKY CONVERSION BAR (Scroll Activated)
           ================================================== */}
-      <aside
-        className={`sticky-cta-bar ${showStickyCta ? "is-visible" : ""}`}
-        aria-label="Quick booking actions"
-      >
+      <StickyCtaBar>
         <div className="sticky-cta-bar__content">
           <div className="sticky-cta-bar__text">
             <strong>La Cuisine de Manou</strong>
@@ -1018,7 +526,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </aside>
+      </StickyCtaBar>
 
       <SiteFooter />
     </main>
