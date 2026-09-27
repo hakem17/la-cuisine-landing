@@ -43,7 +43,10 @@ export default function RootLayout({
       {/* Browser extensions (e.g. ColorZilla's cz-shortcut-listen) inject
           attributes on <body> before hydration; this only silences that one
           element's attribute diff, not mismatches in its children. */}
-      <body className={`${dmSans.className} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${dmSans.className} antialiased`}
+        suppressHydrationWarning
+      >
         {/* Google Tag Manager (noscript) */}
         {/* This is the noscript version of the Google Tag Manager. It will be used if JavaScript is disabled. */}
         <noscript>
