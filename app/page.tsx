@@ -102,7 +102,7 @@ const faqs = [
   },
   {
     q: "How far should we reserve our date?",
-    a: "We recommend booking Thanksgiving, Christmas, New Year’s Eve, Ramadan Iftar and Suhoor, and large corporate events 4–6 weeks in advance. For weddings, we suggest booking 2–3 months ahead, while other events are best booked 3–4 weeks in advance.We’re also happy to accommodate short-notice requests, subject to availability.",
+    a: "We recommend booking Thanksgiving, Christmas, New Year’s Eve, Ramadan Iftar and Suhoor, and large corporate events 4–6 weeks in advance. For weddings, we suggest booking 2–3 months ahead, while other events are best booked 3–4 weeks in advance. We’re also happy to accommodate short-notice requests, subject to availability.",
   },
   {
     q: "Can dietary preferences and allergies be accommodated?",
@@ -988,9 +988,7 @@ export default function Home() {
                 {CONTACT.landline.display}
               </a>
               <span> | </span>
-              <a href={`tel:${CONTACT.mobile.tel}`}>
-                {CONTACT.mobile.display}
-              </a>
+              <a href={`tel:${CONTACT.mobile.tel}`}>{CONTACT.mobile.display}</a>
             </div>
           </div>
         </section>
