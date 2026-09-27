@@ -6,7 +6,7 @@ import { DM_Sans, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const GTM_ID = "GTM-MDS6SP4G";
+const GTM_ID = "GTM-T44TZBQW";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
