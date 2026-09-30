@@ -4,6 +4,15 @@ import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
+function validateContact(data: Record<string, unknown>) {
+  if (!data.full_name || String(data.full_name).trim().length < 2) return 'Please enter your full name.'
+  if (!data.phone || !/^[0-9\s]+$/.test(String(data.phone))) return 'Please enter a valid phone number.'
+  if (!data.email || !String(data.email).includes('@') || !String(data.email).includes('.')) {
+    return 'Please enter a valid email address.'
+  }
+  return ''
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json()
@@ -13,6 +22,36 @@ export async function POST(request: Request) {
     if (!data.event_selection) {
       return NextResponse.json({ success: false, error: 'Please choose your event.' }, { status: 400 })
     }
+    // Private VIP events skip schedule/preferences and are priced manually.
+    const isVip = data.event_selection === 'VIP Events'
+    if (isVip && data.event_type === 'private') {
+      const contactError = validateContact(data)
+      if (contactError) return NextResponse.json({ success: false, error: contactError }, { status: 400 })
+      const booking = await createBooking({
+        event_type: data.event_type,
+        event_selection: data.event_selection,
+        additional_services: Array.isArray(data.additional_services) ? data.additional_services : [],
+        additional_services_other: data.additional_services_other || null,
+        event_date: '',
+        guest_count: null,
+        location: '',
+        location_other: null,
+        budget_min: null,
+        budget_max: null,
+        cuisine: [],
+        cuisine_other: null,
+        contact_channel: 'WhatsApp',
+        channel_other: null,
+        full_name: String(data.full_name).trim(),
+        country_code: data.country_code || '+971',
+        phone: String(data.phone).trim(),
+        email: String(data.email).trim(),
+        company_website: null,
+        role: null,
+      })
+      return NextResponse.json({ success: true, booking_id: booking.booking_id })
+    }
+
     const eventDate = new Date(data.event_date)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -29,20 +68,12 @@ export async function POST(request: Request) {
     if (!data.location) {
       return NextResponse.json({ success: false, error: 'Please choose a location.' }, { status: 400 })
     }
-    if (!data.full_name || String(data.full_name).trim().length < 2) {
-      return NextResponse.json({ success: false, error: 'Please enter your full name.' }, { status: 400 })
-    }
-    if (!data.phone || !/^[0-9\s]+$/.test(data.phone)) {
-      return NextResponse.json({ success: false, error: 'Please enter a valid phone number.' }, { status: 400 })
-    }
-    if (!data.email || !String(data.email).includes('@') || !String(data.email).includes('.')) {
-      return NextResponse.json({ success: false, error: 'Please enter a valid email address.' }, { status: 400 })
-    }
+    const contactError = validateContact(data)
+    if (contactError) return NextResponse.json({ success: false, error: contactError }, { status: 400 })
     if (!data.contact_channel) {
       return NextResponse.json({ success: false, error: 'Please choose a contact channel.' }, { status: 400 })
     }
 
-    const isVip = data.event_selection === 'VIP Events'
     const budget = calculateBudget({
       eventSelection: data.event_selection,
       guestCount: guests,
@@ -81,9 +112,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, booking_id: booking.booking_id })
   } catch (error) {
-    if (error instanceof Error && error.message === 'DATE_UNAVAILABLE') {
-      return NextResponse.json({ success: false, error: 'That date is already booked.' }, { status: 409 })
-    }
     console.error('POST /api/bookings failed:', error)
     return NextResponse.json({ success: false, error: 'Could not save your booking.' }, { status: 500 })
   }

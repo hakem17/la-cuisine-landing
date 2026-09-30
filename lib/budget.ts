@@ -1,6 +1,5 @@
-// Per PRD Section 4 (Q6). "Live Station" and "VIP Events" intentionally have
-// no entry — the client has not provided pricing for them, so calculateBudget
-// must block and prompt for manual pricing rather than guess (see Section 8).
+// Per PRD Section 4 (Q6). "VIP Events" intentionally has no entry — it is
+// priced manually, so calculateBudget blocks rather than guess (see Section 8).
 const AVG_PRICE_PER_GUEST: Record<string, number> = {
   Birthday: 175,
   Wedding: 275,
@@ -11,9 +10,12 @@ const AVG_PRICE_PER_GUEST: Record<string, number> = {
   "Finger Food & Canapes": 175,
   "Breakfast & Coffee Break": 125,
   "Afternoon Tea Tower": 125,
+  // The wizard's Corporate option is labelled "Afternoon Tea".
+  "Afternoon Tea": 125,
   Lunch: 195,
   Dinner: 195,
   "Custom Menus & Themed Catering": 275,
+  "Live Station": 225,
 };
 
 const MIN_BUDGET = 5000;

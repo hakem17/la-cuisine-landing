@@ -11,7 +11,11 @@ const BOOKINGS_HEADER = [
   'channel_other', 'full_name', 'phone', 'email', 'company_website', 'role', 'status', 'created_at',
 ]
 const CONTACTS_HEADER = ['id', 'question', 'full_name', 'phone', 'email', 'created_at']
-const FOOD_DELIVERY_HEADER = ['id', 'request_id', 'delivery_date', 'delivery_time', 'created_at']
+// Contact columns are appended after created_at so rows saved before they
+// existed stay aligned.
+const FOOD_DELIVERY_HEADER = [
+  'id', 'request_id', 'delivery_date', 'delivery_time', 'created_at', 'full_name', 'phone', 'email',
+]
 
 const SHEETS = {
   bookings: { title: 'Bookings', header: BOOKINGS_HEADER },
@@ -55,7 +59,9 @@ async function ensureSheet(sheets: ReturnType<typeof getClient>, key: SheetKey) 
     spreadsheetId: SPREADSHEET_ID!,
     range: `${title}!A1:1`,
   })
-  if (!headerRow.data.values || headerRow.data.values.length === 0) {
+  const current = headerRow.data.values?.[0] ?? []
+  // Write the header when missing, or extend it when new columns were appended.
+  if (current.length < header.length) {
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID!,
       range: `${title}!A1`,

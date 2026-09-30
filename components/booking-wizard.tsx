@@ -38,6 +38,23 @@ const STEPS = [
   "Review",
 ];
 
+// Food delivery skips Q2–Q4 and the review: Q1 → date & time → your info.
+const DELIVERY_STEPS: { ui: number; label: string }[] = [
+  { ui: 1, label: "Event type" },
+  { ui: 2, label: "Date & time" },
+  { ui: 5, label: "Your info" },
+];
+
+// Private VIP events are priced manually, so they skip Q3–Q4 and the review:
+// Q1 → format → your info, then submit and hand off to WhatsApp.
+const VIP_STEPS: { ui: number; label: string }[] = [
+  { ui: 1, label: "Event type" },
+  { ui: 2, label: "Format" },
+  { ui: 5, label: "Your info" },
+];
+
+const VIP_REDIRECT_SECONDS = 5;
+
 // Data layer: the spec's step_number/step_name per question, grouped by the
 // UI step that asks them. The review step (6) is completed by the submit.
 const TRACKED_STEPS: Record<number, { number: number; name: BookingStepName }[]> = {
@@ -236,12 +253,18 @@ function BookingWizardContent() {
     tone: "amber" | "blue" | "red";
     text: string;
   } | null>(null);
-  const [bookedDates, setBookedDates] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [bookingId, setBookingId] = useState("");
   const [submittingDelivery, setSubmittingDelivery] = useState(false);
 
   const isVip = form.event_selection === "VIP Events";
+  const isVipFlow = form.event_type === "private" && isVip;
+  const shortFlowSteps =
+    form.event_type === "food_delivery"
+      ? DELIVERY_STEPS
+      : isVipFlow
+        ? VIP_STEPS
+        : null;
   const budget = useMemo(
     () =>
       calculateBudget({
@@ -272,13 +295,6 @@ function BookingWizardContent() {
   const sliderCeiling = computedMax
     ? Math.max(computedMax * 2, (computedMin ?? 5000) + 10000)
     : 0;
-
-  useEffect(() => {
-    fetch("/api/available-dates")
-      .then((res) => res.json())
-      .then((data) => setBookedDates(data.booked_dates || []))
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     setGuestAlert(validateGuests(form.guest_count, form.event_type, isVip));
@@ -345,7 +361,7 @@ function BookingWizardContent() {
   };
 
   useEffect(() => {
-    if (step === 2 && form.event_type === "food_delivery") return;
+    if (form.event_type === "food_delivery" && step !== 1) return;
     for (const { number, name } of TRACKED_STEPS[step] ?? []) {
       pushEvent("booking_step_view", {
         booking_id: trackingId(),
@@ -402,7 +418,7 @@ function BookingWizardContent() {
     if (current === 2 && !form.event_selection) {
       return "Please choose the specific event format.";
     }
-    if (current === 2 && budget.status === "missing_price") {
+    if (current === 2 && !isVipFlow && budget.status === "missing_price") {
       return "Pricing isn't available yet for this event — please contact us directly to get a quote.";
     }
     if (
@@ -416,9 +432,6 @@ function BookingWizardContent() {
       if (!form.event_date)
         return "Please choose an event date from the calendar.";
       if (form.event_date <= today) return "Please choose a future date.";
-      if (bookedDates.includes(form.event_date)) {
-        return "That date is already confirmed and booked. Please choose another date.";
-      }
       if (form.event_type === "private" && form.guest_count < 5) {
         return "Private events require at least 5 guests.";
       }
@@ -477,7 +490,17 @@ function BookingWizardContent() {
     }
     setError("");
     if (step === 2 && form.event_type === "food_delivery") {
+      setStep(5);
+      return;
+    }
+    if (step === 2 && isVipFlow) {
+      trackStepComplete(2);
+      setStep(5);
+      return;
+    }
+    if (step === 5 && form.event_type === "food_delivery") {
       setSubmittingDelivery(true);
+      let requestId = "";
       try {
         const res = await fetch("/api/food-delivery", {
           method: "POST",
@@ -485,6 +508,10 @@ function BookingWizardContent() {
           body: JSON.stringify({
             delivery_date: form.delivery_date,
             delivery_time: form.delivery_time,
+            full_name: form.full_name.trim(),
+            country_code: form.country_code,
+            phone: form.phone.trim(),
+            email: form.email.trim(),
           }),
         });
         const data = await res.json();
@@ -493,6 +520,7 @@ function BookingWizardContent() {
             data.error || "Could not save your delivery request.",
           );
         }
+        requestId = data.request_id;
       } catch (err) {
         setSubmittingDelivery(false);
         const message =
@@ -509,6 +537,7 @@ function BookingWizardContent() {
         flow: "food-delivery",
         date: form.delivery_date,
         time: form.delivery_time,
+        ref: requestId,
       });
       router.push(`/contact-us?${params.toString()}`);
       return;
@@ -519,6 +548,10 @@ function BookingWizardContent() {
 
   const prev = () => {
     setError("");
+    if ((form.event_type === "food_delivery" || isVipFlow) && step === 5) {
+      setStep(2);
+      return;
+    }
     setStep((s) => Math.max(1, s - 1));
   };
 
@@ -538,6 +571,7 @@ function BookingWizardContent() {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (form.event_type === "food_delivery") return;
     const message = validateStep(5);
     if (message) {
       trackError(5, message);
@@ -560,20 +594,26 @@ function BookingWizardContent() {
           additional_services_other: form.additional_services.includes("Other")
             ? form.additional_services_other
             : null,
-          event_date: form.event_date,
-          guest_count: form.guest_count,
-          location: form.location,
-          location_other:
-            form.location === "Other" ? form.location_other : null,
-          budget_min: budgetRange?.min ?? null,
-          budget_max: budgetRange?.max ?? null,
-          cuisine: form.cuisine.filter((c) => c !== "Other"),
-          cuisine_other: form.cuisine.includes("Other")
-            ? form.cuisine_other
-            : null,
-          contact_channel: form.contact_channel,
-          channel_other:
-            form.contact_channel === "Other" ? form.channel_other : null,
+          ...(isVipFlow
+            ? {}
+            : {
+                event_date: form.event_date,
+                guest_count: form.guest_count,
+                location: form.location,
+                location_other:
+                  form.location === "Other" ? form.location_other : null,
+                budget_min: budgetRange?.min ?? null,
+                budget_max: budgetRange?.max ?? null,
+                cuisine: form.cuisine.filter((c) => c !== "Other"),
+                cuisine_other: form.cuisine.includes("Other")
+                  ? form.cuisine_other
+                  : null,
+                contact_channel: form.contact_channel,
+                channel_other:
+                  form.contact_channel === "Other"
+                    ? form.channel_other
+                    : null,
+              }),
           full_name: form.full_name.trim(),
           country_code: form.country_code,
           phone: form.phone.trim(),
@@ -614,6 +654,60 @@ function BookingWizardContent() {
     }
   };
 
+  const vipWhatsapp = bookingId
+    ? whatsappLink(
+        `Bonjour La Cuisine de Manou,\n\nI have submitted a VIP event enquiry!\n\n• Booking ID: ${bookingId}\n• Contact: ${form.full_name} (${form.country_code} ${form.phone})\n\nLooking forward to planning it together!`,
+      )
+    : "";
+  const [redirectIn, setRedirectIn] = useState(VIP_REDIRECT_SECONDS);
+  const [popupBlocked, setPopupBlocked] = useState(false);
+  useEffect(() => {
+    if (!bookingId || !isVipFlow) return;
+    if (redirectIn <= 0) {
+      // Browsers may block a new tab opened without a click; the button below
+      // stays as the fallback.
+      const tab = window.open(vipWhatsapp, "_blank");
+      if (tab) tab.opener = null;
+      else setPopupBlocked(true);
+      return;
+    }
+    const timer = setTimeout(() => setRedirectIn((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [bookingId, isVipFlow, redirectIn, vipWhatsapp]);
+
+  if (bookingId && isVipFlow) {
+    return (
+      <div className="success-panel">
+        <p className="eyebrow">VIP request received</p>
+        <h2>
+          Thank you,
+          <br />
+          <em>{form.full_name.split(" ")[0] || form.full_name}.</em>
+        </h2>
+        <p>
+          Your VIP event enquiry is safely with us.{" "}
+          {popupBlocked
+            ? "Tap the button below to continue on WhatsApp so our team can plan the details with you personally."
+            : `We're opening WhatsApp in a new tab so our team can plan the details with you personally${
+                redirectIn > 0 ? ` in ${redirectIn}s` : ""
+              }.`}
+        </p>
+        <div className="booking-id">Booking ID · {bookingId}</div>
+        <div className="contact-actions" data-contact-location="booking_success">
+          <a
+            className="book-button"
+            href={vipWhatsapp}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Chat with us on WhatsApp now <ArrowRight size={16} />
+          </a>
+          <PhoneCallButton />
+        </div>
+      </div>
+    );
+  }
+
   if (bookingId) {
     const locText =
       form.location === "Other" ? form.location_other : form.location;
@@ -649,7 +743,19 @@ function BookingWizardContent() {
 
   return (
     <form className="wizard" onSubmit={onSubmit}>
-      {form.event_type !== "food_delivery" && (
+      {shortFlowSteps ? (
+        <ol className="step-bar" aria-label="Request progress">
+          {shortFlowSteps.map(({ ui, label }, index) => {
+            const state = ui < step ? "done" : ui === step ? "current" : "todo";
+            return (
+              <li key={label} className={`step-dot step-dot--${state}`}>
+                <span>{state === "done" ? <Check size={14} /> : index + 1}</span>
+                <em>{label}</em>
+              </li>
+            );
+          })}
+        </ol>
+      ) : (
         <ol className="step-bar" aria-label="Booking progress">
           {STEPS.map((label, index) => {
             const n = index + 1;
@@ -726,7 +832,7 @@ function BookingWizardContent() {
       )}
 
       {/* ==================================================
-          FOOD DELIVERY: DATE + TIME, THEN STRAIGHT TO CONTACT US
+          FOOD DELIVERY: DATE + TIME, THEN YOUR INFO, THEN CONTACT US
           ================================================== */}
       {step === 2 && form.event_type === "food_delivery" && (
         <section className="wizard-step">
@@ -757,8 +863,8 @@ function BookingWizardContent() {
             />
           </label>
           <p className="note note--blue">
-            We'll take you to our contact page next so our team can confirm your
-            delivery directly.
+            Next, share your contact details so our team can confirm your
+            delivery.
           </p>
         </section>
       )}
@@ -1110,7 +1216,13 @@ function BookingWizardContent() {
           ================================================== */}
       {step === 5 && (
         <section className="wizard-step">
-          <p className="eyebrow">Q5 · Contact information</p>
+          <p className="eyebrow">
+            {form.event_type === "food_delivery"
+              ? "Food delivery · Your info"
+              : isVipFlow
+                ? "VIP event · Your info"
+                : "Q5 · Contact information"}
+          </p>
           <h2>Your details</h2>
 
           {/* Q9: Full Name */}
@@ -1336,17 +1448,17 @@ function BookingWizardContent() {
         ) : (
           <span />
         )}
-        {form.event_type === "food_delivery" && step === 2 ? (
+        {form.event_type === "food_delivery" && step === 5 ? (
           <button
             type="button"
             className="book-button"
             onClick={next}
             disabled={submittingDelivery}
           >
-            {submittingDelivery ? "Saving..." : "Continue to Contact Us"}{" "}
+            {submittingDelivery ? "Submitting..." : "Submit request"}{" "}
             {!submittingDelivery && <ArrowRight size={16} />}
           </button>
-        ) : step < 6 ? (
+        ) : step < 6 && !(isVipFlow && step === 5) ? (
           <button type="button" className="book-button" onClick={next}>
             Continue <ArrowRight size={16} />
           </button>

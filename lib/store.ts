@@ -10,11 +10,11 @@ export type Booking = {
   additional_services: string
   additional_services_other: string | null
   event_date: string
-  guest_count: number
+  guest_count: number | null
   location: string
   location_other: string | null
-  budget_min: number
-  budget_max: number
+  budget_min: number | null
+  budget_max: number | null
   cuisine_interests: string
   cuisine_other: string | null
   contact_channel: string
@@ -50,6 +50,9 @@ export type FoodDeliveryRequest = {
   delivery_date: string
   delivery_time: string
   created_at: string
+  full_name: string
+  phone: string
+  email: string
 }
 
 type DatabaseFile = {
@@ -195,11 +198,11 @@ export async function createBooking(input: {
   additional_services: string[]
   additional_services_other: string | null
   event_date: string
-  guest_count: number
+  guest_count: number | null
   location: string
   location_other: string | null
-  budget_min: number
-  budget_max: number
+  budget_min: number | null
+  budget_max: number | null
   cuisine: string[]
   cuisine_other: string | null
   contact_channel: string
@@ -211,14 +214,11 @@ export async function createBooking(input: {
   company_website: string | null
   role: string | null
 }) {
+  // Multiple bookings per day are allowed; the per-day counter keeps IDs unique.
+  // Bookings without an event date (private VIP) are keyed by today's date.
   const existingRows = await getSheetRows('bookings')
-  const booked = existingRows.some((r) => r.event_date === input.event_date)
-  if (booked) {
-    throw new Error('DATE_UNAVAILABLE')
-  }
-
-  const sameDay = existingRows.filter((r) => r.event_date === input.event_date).length
-  const dateStr = input.event_date.replaceAll('-', '')
+  const dateStr = (input.event_date || new Date().toISOString().slice(0, 10)).replaceAll('-', '')
+  const sameDay = existingRows.filter((r) => r.booking_id?.startsWith(`BK-${dateStr}-`)).length
   const booking_id = `BK-${dateStr}-${String(sameDay + 1).padStart(3, '0')}`
   const nextId = existingRows.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1
   const booking: Booking = {
@@ -286,7 +286,7 @@ export async function createContact(input: { question: string; full_name: string
 
 function exportFoodDeliveryCsv(db?: DatabaseFile) {
   const data = db ?? readDb()
-  const headers = ['id', 'request_id', 'delivery_date', 'delivery_time', 'created_at']
+  const headers = ['id', 'request_id', 'delivery_date', 'delivery_time', 'created_at', 'full_name', 'phone', 'email']
   const lines = [headers.join(',')]
   for (const row of data.food_delivery_requests) {
     lines.push(
@@ -305,10 +305,17 @@ function exportFoodDeliveryCsv(db?: DatabaseFile) {
   return { csv, path: FOOD_DELIVERY_CSV_FILE }
 }
 
-// Q1 "Food Delivery" branch: the wizard saves the requested date/time to the
-// spreadsheet before routing the customer to the Contact Us page (no full
-// booking form is collected for this branch, per the PRD).
-export async function createFoodDeliveryRequest(input: { delivery_date: string; delivery_time: string }) {
+// Q1 "Food Delivery" branch: the wizard collects the requested date/time and
+// the customer's contact info, saves them to the spreadsheet, then routes the
+// customer to the Contact Us page (the rest of the booking form is skipped).
+export async function createFoodDeliveryRequest(input: {
+  delivery_date: string
+  delivery_time: string
+  full_name: string
+  country_code: string
+  phone: string
+  email: string
+}) {
   const existingRows = await getSheetRows('food_delivery_requests')
   const nextId = existingRows.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1
   const dateStr = input.delivery_date.replaceAll('-', '')
@@ -320,6 +327,9 @@ export async function createFoodDeliveryRequest(input: { delivery_date: string; 
     delivery_date: input.delivery_date,
     delivery_time: input.delivery_time,
     created_at: new Date().toISOString(),
+    full_name: input.full_name,
+    phone: `${input.country_code} ${input.phone}`.trim(),
+    email: input.email,
   }
   await appendRowToSheet('food_delivery_requests', row)
 

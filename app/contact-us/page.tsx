@@ -15,7 +15,7 @@ export const metadata = {
 export default async function ContactUsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ flow?: string; date?: string; time?: string }>
+  searchParams: Promise<{ flow?: string; date?: string; time?: string; ref?: string }>
 }) {
   const params = await searchParams
   const isFoodDelivery = params.flow === 'food-delivery'
@@ -24,7 +24,7 @@ export default async function ContactUsPage({
     : ''
   const wa = whatsappLink(
     isFoodDelivery
-      ? `Bonjour La Cuisine de Manou, I'd like to request a food delivery on ${params.date || '[date]'} at ${params.time || '[time]'}.`
+      ? `Bonjour La Cuisine de Manou, I'd like to request a food delivery on ${params.date || '[date]'} at ${params.time || '[time]'}${params.ref ? ` (ref ${params.ref})` : ''}.`
       : 'Bonjour La Cuisine de Manou, I have a question.',
   )
 
@@ -50,8 +50,14 @@ export default async function ContactUsPage({
         </h1>
         {isFoodDelivery ? (
           <p>
-            Requested for <strong>{params.date}</strong> at <strong>{params.time}</strong>. Reach us directly below,
-            or send the details through the form and our team will confirm shortly.
+            Your request for <strong>{params.date}</strong> at <strong>{params.time}</strong> has been received
+            {params.ref ? (
+              <>
+                {' '}
+                (ref <strong>{params.ref}</strong>)
+              </>
+            ) : null}
+            . Our team will confirm shortly — or reach us directly below.
           </p>
         ) : (
           <p>
