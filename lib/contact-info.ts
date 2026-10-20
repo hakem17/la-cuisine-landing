@@ -4,7 +4,7 @@ export const CONTACT = {
   tagline: 'Leave us a message, we’ll get back to you shortly.',
   email: 'sales@lacuisinedemanou.ae',
   landline: { display: '+971 (02) 552 6608', tel: '+97125526608' },
-  mobile: { display: '+971 (0)56 732 2519', tel: '+971567322519' },
+  mobile: { display: '+971 (0)56 732 2519', intl: '+971 56 732 2519', tel: '+971567322519' },
   officeHours: 'Mon - Fri: 9am - 5pm',
   operationalHours: 'Mon - Sun',
 }

@@ -34,6 +34,7 @@ export type ContactLocation =
   | 'contact_page_hero'
   | 'booking_success'
   | 'contact_form_success'
+  | 'links_page'
   | 'other'
 
 export type TrackedSection = 'services' | 'usps' | 'gallery' | 'testimonials' | 'faq'
