@@ -40,9 +40,12 @@ export default async function LinksPage({
             <header className="links-intro">
               <p className="eyebrow">Private chef &amp; catering · UAE</p>
               <h1>
-                French heritage, <em>seasonal tables.</em>
+                Luxury <em>Gourmet Catering</em>
               </h1>
-              <p>Bespoke menus for intimate dinners, celebrations and corporate gatherings across Abu Dhabi and Dubai.</p>
+              <p>
+                Exceptional dining inspired by authentic flavors and warm hospitality. Thoughtfully tailored for every
+                occasion from intimate gatherings to grand celebrations across Dubai, Abu Dhabi, and the wider UAE.
+              </p>
             </header>
 
             <section className="links-section" aria-labelledby="links-follow">
